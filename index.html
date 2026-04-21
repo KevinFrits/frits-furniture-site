@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Frits Furniture Design</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  color: #111;
+  overflow-x: hidden;
+}
+
+/* HERO (PARALLAX) */
+.hero {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 100%;
+  height: 140%;
+  background-image: url("https://fritsfurnituredesign.com/Images/hero.jpg");
+  background-size: cover;
+  background-position: center 30%;
+  transform: translateY(0);
+}
+
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin: 0;
+}
+
+.hero p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+/* SECTIONS */
+.section {
+  padding: 100px 20px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+/* FADE IN */
+.fade {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease;
+}
+
+.fade.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* GALLERY */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  overflow: hidden;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.03);
+}
+
+.card img {
+  width: 100%;
+  display: block;
+}
+
+/* BEFORE AFTER */
+.ba {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ba img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+}
+
+/* CONTACT */
+.contact {
+  text-align: center;
+  padding: 80px 20px;
+  background: #f9f9f9;
+}
+
+button {
+  padding: 14px 24px;
+  border: none;
+  background: #111;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <h1>Frits Furniture Design</h1>
+    <p>Modern Restored Furniture • Dallas, Texas</p>
+  </div>
+</div>
+
+<!-- FEATURED -->
+<div class="section fade">
+  <h2>Featured Pieces</h2>
+  <div class="grid">
+
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg" />
+    </div>
+
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg" />
+    </div>
+
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg" />
+    </div>
+
+  </div>
+</div>
+
+<!-- BEFORE / AFTER -->
+<div class="section fade">
+  <h2>Restoration Work</h2>
+  <div class="ba">
+    <img src="https://fritsfurnituredesign.com/Images/PXL_20260412_014229567~2.jpg" />
+    <img src="https://fritsfurnituredesign.com/Images/PXL_20251222_212118115~2.jpg" />
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="contact fade">
+  <h2>Interested in a piece?</h2>
+  <p>Message me to check availability or custom work.</p>
+  <button onclick="window.location.href='https://facebook.com'">
+    Message on Facebook
+  </button>
+</div>
+
+<script>
+// fade-in animation
+const elements = document.querySelectorAll('.fade');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show');
+    }
+  });
+}, { threshold: 0.2 });
+
+elements.forEach(el => observer.observe(el));
+
+// parallax
+const heroBg = document.querySelector('.hero-bg');
+
+window.addEventListener('scroll', () => {
+  let scrollY = window.scrollY;
+  heroBg.style.transform = `translateY(${scrollY * 0.3}px)`;
+});
+</script>
+
+</body>
+</html>
