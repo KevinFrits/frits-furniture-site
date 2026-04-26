@@ -14,7 +14,7 @@ body {
   overflow-x: hidden;
 }
 
-/* HERO (PARALLAX) */
+/* HERO */
 .hero {
   position: relative;
   height: 100vh;
@@ -70,7 +70,7 @@ body {
   margin: auto;
 }
 
-/* FADE IN */
+/* FADE */
 .fade {
   opacity: 0;
   transform: translateY(40px);
@@ -100,8 +100,8 @@ body {
 }
 
 .card {
-  min-width: 300px;
-  flex: 0 0 auto;
+  flex: 0 0 340px;   /* fixed width */
+  height: 300px;     /* fixed height */
   overflow: hidden;
   border-radius: 12px;
   background: #fff;
@@ -115,6 +115,8 @@ body {
 
 .card img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
@@ -219,7 +221,6 @@ button {
         <img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg" />
       </div>
 
-      <!-- duplicate a few for smoother scroll feel -->
       <div class="card">
         <img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg" />
       </div>
@@ -251,7 +252,7 @@ button {
 </div>
 
 <script>
-// fade-in animation
+// fade-in
 const elements = document.querySelectorAll('.fade');
 
 const observer = new IntersectionObserver(entries => {
@@ -268,11 +269,10 @@ elements.forEach(el => observer.observe(el));
 const heroBg = document.querySelector('.hero-bg');
 
 window.addEventListener('scroll', () => {
-  let scrollY = window.scrollY;
-  heroBg.style.transform = `translateY(${scrollY * 0.3}px)`;
+  heroBg.style.transform = `translateY(${window.scrollY * 0.3}px)`;
 });
 
-// HOVER SCROLL
+// hover scroll
 const slider = document.getElementById('slider');
 const leftZone = document.querySelector('.hover-zone.left');
 const rightZone = document.querySelector('.hover-zone.right');
@@ -282,7 +282,7 @@ let scrollInterval;
 function startScroll(direction) {
   stopScroll();
   scrollInterval = setInterval(() => {
-    slider.scrollLeft += direction * 6;
+    slider.scrollLeft += direction * 5;
   }, 10);
 }
 
