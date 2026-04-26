@@ -70,8 +70,8 @@ body {
 
 /* SECTIONS */
 .section {
-  padding: 100px 20px;
-  max-width: 1100px;
+  padding: 120px 20px;
+  max-width: 1400px; /* wider container */
   margin: auto;
 }
 
@@ -90,14 +90,15 @@ body {
 /* ===== SLIDER ===== */
 .slider-wrap {
   position: relative;
+  margin-top: 40px;
 }
 
 .grid {
   display: flex;
   overflow-x: auto;
-  gap: 20px;
+  gap: 30px; /* more spacing */
   scroll-behavior: smooth;
-  padding-bottom: 20px;
+  padding-bottom: 40px;
 }
 
 .grid::-webkit-scrollbar {
@@ -105,12 +106,12 @@ body {
 }
 
 .card {
-  flex: 0 0 340px;
-  aspect-ratio: 4 / 3;
-  border-radius: 12px;
+  flex: 0 0 420px; /* wider cards */
+  aspect-ratio: 4 / 5; /* taller look (better for furniture) */
+  border-radius: 14px;
   overflow: hidden;
   position: relative;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
   transform: scale(0.85);
   opacity: 0.6;
 }
@@ -127,7 +128,7 @@ body {
 .hover-zone {
   position: absolute;
   top: 0;
-  width: 100px;
+  width: 120px;
   height: 100%;
   z-index: 5;
 }
@@ -166,7 +167,7 @@ body {
 /* CONTACT */
 .contact {
   text-align: center;
-  padding: 80px 20px;
+  padding: 100px 20px;
   background: #f9f9f9;
 }
 
@@ -246,7 +247,7 @@ window.addEventListener('scroll', () => {
   heroBg.style.transform = `translateY(${window.scrollY * 0.3}px)`;
 });
 
-// ===== HOVER SCROLL =====
+// hover scroll
 const slider = document.getElementById('slider');
 const leftZone = document.querySelector('.hover-zone.left');
 const rightZone = document.querySelector('.hover-zone.right');
@@ -283,7 +284,7 @@ leftZone.addEventListener('mousemove', (e) => handleMove(e, -1));
 rightZone.addEventListener('mouseleave', stopScroll);
 leftZone.addEventListener('mouseleave', stopScroll);
 
-// ===== SMOOTH CENTER FOCUS (FIXED) =====
+// center focus scaling
 const cards = document.querySelectorAll('.card');
 
 slider.addEventListener('mousemove', (e) => {
@@ -292,10 +293,10 @@ slider.addEventListener('mousemove', (e) => {
     const center = rect.left + rect.width / 2;
     const distance = Math.abs(e.clientX - center);
 
-    const maxDistance = 400;
+    const maxDistance = 500;
 
     let scale = 1 - (distance / maxDistance);
-    scale = Math.max(0.75, Math.min(1.15, scale));
+    scale = Math.max(0.75, Math.min(1.2, scale));
 
     let opacity = 1 - (distance / maxDistance);
     opacity = Math.max(0.4, Math.min(1, opacity));
