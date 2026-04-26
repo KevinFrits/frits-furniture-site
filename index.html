@@ -101,7 +101,7 @@ body {
 
 .card {
   flex: 0 0 340px;
-  aspect-ratio: 4 / 3; /* LOCKED size */
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 12px;
   background: #fff;
@@ -274,26 +274,48 @@ window.addEventListener('scroll', () => {
   heroBg.style.transform = `translateY(${window.scrollY * 0.3}px)`;
 });
 
-// hover scroll
+// ===== ADVANCED HOVER SCROLL =====
 const slider = document.getElementById('slider');
 const leftZone = document.querySelector('.hover-zone.left');
 const rightZone = document.querySelector('.hover-zone.right');
 
-let scrollInterval;
+let direction = 0;
+let speed = 0;
 
-function startScroll(direction) {
-  stopScroll();
-  scrollInterval = setInterval(() => {
-    slider.scrollLeft += direction * 5;
-  }, 10);
+const MAX_SPEED = 20;
+
+function updateScroll() {
+  if (direction !== 0) {
+    slider.scrollLeft += direction * speed;
+  }
+  requestAnimationFrame(updateScroll);
+}
+updateScroll();
+
+function handleMove(e, dir) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const width = rect.width;
+
+  let intensity;
+
+  if (dir === 1) {
+    intensity = x / width;
+  } else {
+    intensity = 1 - (x / width);
+  }
+
+  speed = Math.max(2, intensity * MAX_SPEED);
+  direction = dir;
 }
 
 function stopScroll() {
-  clearInterval(scrollInterval);
+  direction = 0;
+  speed = 0;
 }
 
-rightZone.addEventListener('mouseenter', () => startScroll(1));
-leftZone.addEventListener('mouseenter', () => startScroll(-1));
+rightZone.addEventListener('mousemove', (e) => handleMove(e, 1));
+leftZone.addEventListener('mousemove', (e) => handleMove(e, -1));
 
 rightZone.addEventListener('mouseleave', stopScroll);
 leftZone.addEventListener('mouseleave', stopScroll);
