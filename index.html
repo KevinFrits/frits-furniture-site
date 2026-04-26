@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Frits Furniture Design</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 body {
   margin: 0;
@@ -53,14 +55,17 @@ body {
   text-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-.hero h1 {
-  font-size: 48px;
-  margin: 0;
+/* LOGO */
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 56px;
 }
 
-.hero p {
-  font-size: 18px;
-  opacity: 0.9;
+.logo span {
+  display: block;
+  font-size: 14px;
+  letter-spacing: 6px;
+  margin-top: 8px;
 }
 
 /* SECTIONS */
@@ -82,7 +87,7 @@ body {
   transform: translateY(0);
 }
 
-/* ===== FEATURED SLIDER ===== */
+/* ===== SLIDER ===== */
 .slider-wrap {
   position: relative;
 }
@@ -92,7 +97,7 @@ body {
   overflow-x: auto;
   gap: 20px;
   scroll-behavior: smooth;
-  padding-bottom: 10px;
+  padding-bottom: 20px;
 }
 
 .grid::-webkit-scrollbar {
@@ -102,16 +107,12 @@ body {
 .card {
   flex: 0 0 340px;
   aspect-ratio: 4 / 3;
-  overflow: hidden;
   border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  transition: transform 0.3s ease;
+  overflow: hidden;
   position: relative;
-}
-
-.card:hover {
-  transform: scale(1.03);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: scale(0.8);
+  opacity: 0.5;
 }
 
 .card img {
@@ -120,6 +121,19 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* ACTIVE STATES */
+.card.active {
+  transform: scale(1.15);
+  opacity: 1;
+  z-index: 3;
+}
+
+.card.near {
+  transform: scale(0.95);
+  opacity: 0.8;
+  z-index: 2;
 }
 
 /* HOVER ZONES */
@@ -131,30 +145,21 @@ body {
   z-index: 5;
 }
 
-.hover-zone.left {
-  left: 0;
-}
+.hover-zone.left { left: 0; }
+.hover-zone.right { right: 0; }
 
-.hover-zone.right {
-  right: 0;
-}
-
-/* GRADIENT FADE */
-.hover-zone.left::after,
-.hover-zone.right::after {
+/* GRADIENT */
+.hover-zone.left::after {
   content: "";
   position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.hover-zone.left::after {
+  inset: 0;
   background: linear-gradient(to right, rgba(255,255,255,0.95), transparent);
 }
 
 .hover-zone.right::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: linear-gradient(to left, rgba(255,255,255,0.95), transparent);
 }
 
@@ -185,7 +190,6 @@ button {
   color: white;
   border-radius: 8px;
   cursor: pointer;
-  margin-top: 20px;
 }
 </style>
 </head>
@@ -196,7 +200,7 @@ button {
 <div class="hero">
   <div class="hero-bg"></div>
   <div class="hero-content">
-    <h1>Frits Furniture Design</h1>
+    <h1 class="logo">Frits <span>FURNITURE DESIGN</span></h1>
     <p>Modern Restored Furniture • Dallas, Texas</p>
   </div>
 </div>
@@ -211,25 +215,11 @@ button {
 
     <div class="grid" id="slider">
 
-      <div class="card">
-        <img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg" />
-      </div>
-
-      <div class="card">
-        <img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg" />
-      </div>
-
-      <div class="card">
-        <img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg" />
-      </div>
-
-      <div class="card">
-        <img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg" />
-      </div>
-
-      <div class="card">
-        <img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg" />
-      </div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg" /></div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg" /></div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg" /></div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg" /></div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg" /></div>
 
     </div>
   </div>
@@ -256,32 +246,26 @@ button {
 <script>
 // fade-in
 const elements = document.querySelectorAll('.fade');
-
 const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('show');
-    }
+    if (entry.isIntersecting) entry.target.classList.add('show');
   });
 }, { threshold: 0.2 });
-
 elements.forEach(el => observer.observe(el));
 
 // parallax
 const heroBg = document.querySelector('.hero-bg');
-
 window.addEventListener('scroll', () => {
   heroBg.style.transform = `translateY(${window.scrollY * 0.3}px)`;
 });
 
-// ===== ADVANCED HOVER SCROLL =====
+// ===== SCROLL =====
 const slider = document.getElementById('slider');
 const leftZone = document.querySelector('.hover-zone.left');
 const rightZone = document.querySelector('.hover-zone.right');
 
 let direction = 0;
 let speed = 0;
-
 const MAX_SPEED = 20;
 
 function updateScroll() {
@@ -297,14 +281,7 @@ function handleMove(e, dir) {
   const x = e.clientX - rect.left;
   const width = rect.width;
 
-  let intensity;
-
-  if (dir === 1) {
-    intensity = x / width;
-  } else {
-    intensity = 1 - (x / width);
-  }
-
+  let intensity = dir === 1 ? x / width : 1 - (x / width);
   speed = Math.max(2, intensity * MAX_SPEED);
   direction = dir;
 }
@@ -316,9 +293,37 @@ function stopScroll() {
 
 rightZone.addEventListener('mousemove', (e) => handleMove(e, 1));
 leftZone.addEventListener('mousemove', (e) => handleMove(e, -1));
-
 rightZone.addEventListener('mouseleave', stopScroll);
 leftZone.addEventListener('mouseleave', stopScroll);
+
+// ===== CENTER FOCUS EFFECT =====
+const cards = document.querySelectorAll('.card');
+
+slider.addEventListener('mousemove', (e) => {
+  let closestIndex = 0;
+  let closestDistance = Infinity;
+
+  cards.forEach((card, index) => {
+    const rect = card.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const distance = Math.abs(e.clientX - center);
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestIndex = index;
+    }
+  });
+
+  cards.forEach((card, index) => {
+    card.classList.remove('active', 'near');
+
+    if (index === closestIndex) {
+      card.classList.add('active');
+    } else if (Math.abs(index - closestIndex) === 1) {
+      card.classList.add('near');
+    }
+  });
+});
 </script>
 
 </body>
