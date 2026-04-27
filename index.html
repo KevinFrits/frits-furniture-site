@@ -12,6 +12,7 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #fff;
+  overflow-x: hidden;
 }
 
 /* HERO */
@@ -36,24 +37,23 @@ body {
 }
 
 /* VIEWPORT */
-.slider-container {
+.viewport {
   width: 70%;
   margin: auto;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  white-space: nowrap;
-  cursor: grab;
-  scroll-behavior: auto;
+  overflow: hidden;
+  position: relative;
 }
 
-.slider-container::-webkit-scrollbar {
-  display: none;
+/* TRACK */
+.track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
 }
 
-/* ITEM */
+/* CARD */
 .card {
-  display: inline-block;
-  width: 260px;
+  flex: 0 0 260px;
   height: 225px;
   margin: 0 -60px;
   border-radius: 14px;
@@ -78,11 +78,14 @@ body {
 <div class="section">
   <h2 style="text-align:center;">Portfolio</h2>
 
-  <div class="slider-container" id="slider"></div>
+  <div class="viewport" id="viewport">
+    <div class="track" id="track"></div>
+  </div>
 </div>
 
 <script>
-const slider = document.getElementById('slider');
+const track = document.getElementById('track');
+const viewport = document.getElementById('viewport');
 
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
@@ -90,52 +93,67 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// 🔁 duplicate for seamless loop
-function build() {
-  for (let i = 0; i < 2; i++) {
-    images.forEach(src => {
-      const div = document.createElement('div');
-      div.className = 'card';
+// ===== BUILD (duplicate once) =====
+for (let i = 0; i < 2; i++) {
+  images.forEach(src => {
+    const card = document.createElement('div');
+    card.className = 'card';
 
-      const img = document.createElement('img');
-      img.src = src;
+    const img = document.createElement('img');
+    img.src = src;
 
-      div.appendChild(img);
-      slider.appendChild(div);
-    });
-  }
+    card.appendChild(img);
+    track.appendChild(card);
+  });
 }
-build();
 
-// wait for layout
+// ===== STATE =====
+let x = 0;
+let velocity = 0;
+const MAX_SPEED = 25;
+
+// smooth physics
+const lerp = (a, b, n) => a + (b - a) * n;
+
+// ===== MOUSE CONTROLS =====
+viewport.addEventListener('mousemove', (e) => {
+  const rect = viewport.getBoundingClientRect();
+  const percent = (e.clientX - rect.left) / rect.width;
+
+  const target = (percent - 0.5) * MAX_SPEED;
+  velocity = lerp(velocity, target, 0.1);
+});
+
+viewport.addEventListener('mouseleave', () => {
+  velocity = lerp(velocity, 0, 0.2);
+});
+
+// ===== LOOP WIDTH (safe estimate) =====
+let halfWidth = 0;
+
 window.addEventListener('load', () => {
-  slider.scrollLeft = slider.scrollWidth / 4;
+  halfWidth = track.scrollWidth / 2;
+  x = halfWidth;
 });
 
-// ===== MOUSE CONTROLS SPEED =====
-let speed = 0;
-
-document.addEventListener('mousemove', (e) => {
-  const x = e.clientX / window.innerWidth;
-  speed = (x - 0.5) * 20; // adjust sensitivity
-});
-
-// ===== LOOP ENGINE =====
+// ===== ANIMATION =====
 function animate() {
-  slider.scrollLeft += speed;
+  x += velocity;
 
-  const max = slider.scrollWidth / 2;
+  // 🔥 seamless infinite loop
+  if (halfWidth && x >= halfWidth * 2) {
+    x -= halfWidth;
+  }
 
-  // 🔥 seamless reset
-  if (slider.scrollLeft >= max) {
-    slider.scrollLeft -= max;
+  if (halfWidth && x <= 0) {
+    x += halfWidth;
   }
-  if (slider.scrollLeft <= 0) {
-    slider.scrollLeft += max;
-  }
+
+  track.style.transform = `translateX(${-x}px)`;
 
   requestAnimationFrame(animate);
 }
+
 animate();
 </script>
 
