@@ -137,12 +137,13 @@ const images = Array.from({ length: 40 }, (_, i) => sourceImages[i % sourceImage
 let cards = [];
 let position = 0;
 let speed = 0;
-const MAX_SPEED = 35;
+
+const MAX_SPEED = 42;
+const ACCELERATION = 2;
 
 let cardWidth = 0;
 let cardStep = 0;
 let totalWidth = 0;
-let baseOffset = 0;
 
 /* BUILD */
 images.forEach(src => {
@@ -161,6 +162,10 @@ function wrap(value, size) {
   return ((value % size) + size) % size;
 }
 
+function wrapCentered(value, size) {
+  return wrap(value + size / 2, size) - (size / 2);
+}
+
 function measure() {
   if (!cards.length) return;
 
@@ -173,8 +178,7 @@ function measure() {
   cardStep = cardWidth + marginLeft + marginRight;
   totalWidth = cardStep * cards.length;
 
-  baseOffset = ((container.clientWidth - cardWidth) / 2) - (cardStep * 2);
-
+  position = wrap(position, totalWidth);
   applyEffect();
 }
 
@@ -187,12 +191,16 @@ window.addEventListener('mousemove', (e) => {
   const rect = container.getBoundingClientRect();
   const insideContainerHeight = e.clientY >= rect.top && e.clientY <= rect.bottom;
 
-  if (insideContainerHeight) {
-    const percent = (e.clientX / window.innerWidth) - 0.5;
-    speed = percent * MAX_SPEED;
-  } else {
+  if (!insideContainerHeight) {
     speed = 0;
+    return;
   }
+
+  const normalized = (e.clientX - (window.innerWidth / 2)) / (window.innerWidth / 2);
+  const clamped = Math.max(-1, Math.min(1, normalized));
+  const magnitude = Math.pow(Math.abs(clamped), ACCELERATION);
+
+  speed = Math.sign(clamped) * magnitude * MAX_SPEED;
 });
 
 window.addEventListener('mouseleave', () => {
@@ -215,21 +223,21 @@ function applyEffect() {
   if (!totalWidth) return;
 
   const containerRect = container.getBoundingClientRect();
-  const center = window.innerWidth / 2;
+  const containerCenterX = container.clientWidth / 2;
 
   cards.forEach((card, index) => {
-    const ringX = wrap((index * cardStep) - position, totalWidth);
-    const x = baseOffset + ringX;
+    const relativeX = wrapCentered((index * cardStep) - position, totalWidth);
+    const x = containerCenterX - (cardWidth / 2) + relativeX;
 
-    const c = containerRect.left + x + (cardWidth / 2);
-    const dist = c - center;
+    const dist = relativeX;
     const abs = Math.abs(dist);
 
     let scale = 1 - (abs / 500);
     scale = Math.max(0.7, Math.min(1.15, scale));
 
-    let y = Math.pow(dist / 200, 2) * 10;
-    let rotate = dist / 25;
+    const y = Math.pow(dist / 200, 2) * 10;
+    const rotate = dist / 25;
+    const opacity = Math.max(0, 1 - (abs / 600));
 
     card.style.left = `${x}px`;
     card.style.transform = `
@@ -237,8 +245,7 @@ function applyEffect() {
       scale(${scale})
       rotateY(${rotate}deg)
     `;
-
-    card.style.opacity = 1 - (abs / 600);
+    card.style.opacity = opacity;
     card.style.zIndex = Math.round(scale * 100);
   });
 }
