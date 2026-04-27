@@ -14,7 +14,7 @@ body {
   overflow-x: hidden;
 }
 
-/* HERO (RESTORED ORIGINAL STYLE) */
+/* HERO */
 .hero {
   position: relative;
   height: 100vh;
@@ -29,7 +29,8 @@ body {
   height: 140%;
   background-image: url("https://fritsfurnituredesign.com/Images/hero.jpg");
   background-size: cover;
-  background-position: center;
+  background-position: center 30%;
+  transform: translateY(0);
 }
 
 .hero-bg::after {
@@ -39,6 +40,7 @@ body {
   background: rgba(0,0,0,0.25);
 }
 
+/* 🔥 YOUR ORIGINAL BLOCKY LOGO STYLE */
 .hero-content {
   position: relative;
   z-index: 2;
@@ -52,53 +54,44 @@ body {
 }
 
 .hero h1 {
-  font-size: 48px;
+  font-size: 54px;
   margin: 0;
-  font-family: Georgia, serif;
-  font-weight: 400;
-  letter-spacing: 1px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .hero p {
-  font-size: 18px;
+  font-size: 16px;
   opacity: 0.9;
+  letter-spacing: 3px;
+  margin-top: 10px;
+  text-transform: uppercase;
 }
 
-/* SECTION */
+/* SECTIONS */
 .section {
-  padding: 90px 20px;
+  padding: 100px 20px;
   max-width: 1100px;
   margin: auto;
-  text-align: center;
 }
 
-/* SIMPLE CAROUSEL (STABLE) */
-.carousel {
-  display: flex;
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
-  overflow-x: auto;
-  padding: 20px;
-  scroll-snap-type: x mandatory;
-}
-
-.carousel::-webkit-scrollbar {
-  display: none;
 }
 
 .card {
-  min-width: 280px;
-  height: 220px;
-  flex: 0 0 auto;
-  border-radius: 12px;
   overflow: hidden;
-  scroll-snap-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 .card img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  display: block;
 }
 
 /* BEFORE AFTER */
@@ -106,12 +99,11 @@ body {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
-  justify-content: center;
 }
 
 .ba img {
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
   border-radius: 12px;
 }
 
@@ -119,7 +111,7 @@ body {
 .contact {
   text-align: center;
   padding: 80px 20px;
-  background: #f7f7f7;
+  background: #f9f9f9;
 }
 
 button {
@@ -136,23 +128,32 @@ button {
 
 <body>
 
-<!-- HERO (RESTORED LOGO) -->
+<!-- HERO -->
 <div class="hero">
   <div class="hero-bg"></div>
+
   <div class="hero-content">
     <h1>Frits Furniture Design</h1>
     <p>Modern Restored Furniture • Dallas, Texas</p>
   </div>
 </div>
 
-<!-- PORTFOLIO (WORKING CAROUSEL) -->
+<!-- PORTFOLIO -->
 <div class="section">
   <h2>Portfolio</h2>
 
-  <div class="carousel">
-    <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"></div>
-    <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"></div>
-    <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"></div>
+  <div class="grid">
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg">
+    </div>
+
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg">
+    </div>
+
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg">
+    </div>
   </div>
 </div>
 
@@ -170,29 +171,19 @@ button {
 <div class="contact">
   <h2>Interested in a piece?</h2>
   <p>Message me to check availability or custom work.</p>
+
   <button onclick="window.location.href='https://facebook.com'">
     Message on Facebook
   </button>
 </div>
 
 <script>
-// optional smooth auto scroll (very stable)
-const carousel = document.querySelector('.carousel');
+// parallax (same as before)
+const heroBg = document.querySelector('.hero-bg');
 
-let speed = 0.3;
-
-function animate() {
-  carousel.scrollLeft += speed;
-
-  // loop safely (no jump feeling because scroll snap smooths it)
-  if (carousel.scrollLeft >= carousel.scrollWidth - carousel.clientWidth) {
-    carousel.scrollLeft = 0;
-  }
-
-  requestAnimationFrame(animate);
-}
-
-animate();
+window.addEventListener('scroll', () => {
+  heroBg.style.transform = `translateY(${window.scrollY * 0.3}px)`;
+});
 </script>
 
 </body>
