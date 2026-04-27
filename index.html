@@ -45,30 +45,27 @@ body {
 .slider-container {
   width: 70%;
   margin: auto;
+  overflow: hidden;
   position: relative;
-  overflow: visible;
 }
 
 /* SLIDER */
 .grid {
   display: flex;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  padding: 80px 0;
+  gap: 0;
+  padding: 100px 0;
+  transition: transform 0.3s ease;
 }
-.grid::-webkit-scrollbar { display: none; }
 
 /* CARDS */
 .card {
-  flex: 0 0 360px;
-  height: 460px;
-  margin-left: -120px; /* FORCE overlap */
+  flex: 0 0 340px;
+  height: 440px;
+  margin-left: -100px;
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-  transform: scale(0.8);
-  opacity: 0.5;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .card:first-child {
   margin-left: 0;
@@ -81,25 +78,6 @@ body {
   cursor: pointer;
 }
 
-/* ARROWS */
-.arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 30px;
-  background: rgba(255,255,255,0.9);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 50;
-}
-.arrow.left { left: -25px; }
-.arrow.right { right: -25px; }
-
 /* MODAL */
 .modal {
   position: fixed;
@@ -108,7 +86,6 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 999;
 }
 .modal img {
   max-width: 90%;
@@ -133,16 +110,12 @@ body {
   <h2 style="text-align:center;">Featured Pieces</h2>
 
   <div class="slider-container">
-    <div class="arrow left" id="leftBtn">&#8249;</div>
-    <div class="arrow right" id="rightBtn">&#8250;</div>
-
     <div class="grid" id="slider">
 
+      <!-- ORIGINAL SET -->
       <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"></div>
       <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"></div>
       <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"></div>
-      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"></div>
-      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"></div>
 
     </div>
   </div>
@@ -154,77 +127,69 @@ body {
 
 <script>
 const slider = document.getElementById('slider');
-const cards = document.querySelectorAll('.card');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
 
-// ===== CENTER SNAP =====
-function snapToCenter() {
-  let closest = null;
-  let closestDist = Infinity;
+// ===== DUPLICATE FOR INFINITE LOOP =====
+slider.innerHTML += slider.innerHTML + slider.innerHTML;
 
-  cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    const center = rect.left + rect.width / 2;
-    const screenCenter = window.innerWidth / 2;
-    const dist = Math.abs(center - screenCenter);
+let scrollX = 0;
 
-    if (dist < closestDist) {
-      closestDist = dist;
-      closest = card;
-    }
-  });
+// ===== AUTO SCROLL LOOP =====
+function animate() {
+  scrollX += 0.5;
 
-  if (closest) {
-    const rect = closest.getBoundingClientRect();
-    const offset = rect.left + rect.width / 2 - window.innerWidth / 2;
-    slider.scrollBy({ left: offset, behavior: "smooth" });
+  if (scrollX >= slider.scrollWidth / 3) {
+    scrollX = 0;
   }
-}
 
-// ===== SCALE + 3D =====
-slider.addEventListener('mousemove', (e) => {
+  slider.style.transform = `translateX(${-scrollX}px)`;
+
+  applyRingEffect();
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ===== RING EFFECT =====
+function applyRingEffect() {
+  const cards = document.querySelectorAll('.card');
+  const center = window.innerWidth / 2;
+
   cards.forEach(card => {
     const rect = card.getBoundingClientRect();
-    const center = rect.left + rect.width / 2;
-    const distance = e.clientX - center;
+    const cardCenter = rect.left + rect.width / 2;
+    const dist = cardCenter - center;
 
-    const abs = Math.abs(distance);
+    const abs = Math.abs(dist);
 
-    let scale = 1 - (abs / 500);
-    scale = Math.max(0.7, Math.min(1.2, scale));
+    // scale
+    let scale = 1 - (abs / 600);
+    scale = Math.max(0.6, Math.min(1.2, scale));
 
-    let rotate = distance / 20;
+    // vertical arc (THIS makes it look like a ring)
+    let y = Math.pow(dist / 200, 2) * 20;
 
-    card.style.transform = `scale(${scale}) rotateY(${rotate}deg)`;
-    card.style.opacity = 1 - (abs / 600);
+    // tilt
+    let rotate = dist / 15;
+
+    card.style.transform = `
+      translateY(${y}px)
+      scale(${scale})
+      rotateY(${rotate}deg)
+    `;
+
+    card.style.opacity = 1 - (abs / 800);
     card.style.zIndex = Math.round(scale * 100);
   });
-});
+}
 
-slider.addEventListener('mouseleave', snapToCenter);
-
-// ===== ARROWS =====
-document.getElementById('leftBtn').onclick = () => {
-  slider.scrollBy({ left: -400, behavior: "smooth" });
-};
-document.getElementById('rightBtn').onclick = () => {
-  slider.scrollBy({ left: 400, behavior: "smooth" });
-};
-
-// ===== KEYBOARD =====
-document.addEventListener('keydown', (e) => {
-  if (e.key === "ArrowRight") slider.scrollBy({ left: 400, behavior: "smooth" });
-  if (e.key === "ArrowLeft") slider.scrollBy({ left: -400, behavior: "smooth" });
-});
-
-// ===== MODAL =====
-cards.forEach(card => {
-  const img = card.querySelector('img');
-  img.onclick = () => {
+// ===== CLICK IMAGE =====
+document.addEventListener('click', (e) => {
+  if (e.target.tagName === 'IMG') {
     modal.classList.add('show');
-    modalImg.src = img.src;
-  };
+    modalImg.src = e.target.src;
+  }
 });
 
 modal.onclick = () => modal.classList.remove('show');
