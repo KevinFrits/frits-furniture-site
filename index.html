@@ -138,13 +138,14 @@ const images = Array.from({ length: 40 }, (_, i) => sourceImages[i % sourceImage
 let cards = [];
 let position = 0;
 let speed = 0;
+let isUserControlling = false;
 
 const MAX_SPEED = 26;
 const EDGE_SPEED = 5;
-const DEAD_ZONE = 0.12;
-const PEAK_ZONE = 0.28;
-const SNAP_STRENGTH = 0.14;
-const SNAP_THRESHOLD = 0.15;
+const DEAD_ZONE = 0.15;
+const PEAK_ZONE = 0.35;
+const SNAP_STRENGTH = 0.22;
+const SNAP_THRESHOLD = 0.08;
 
 let cardWidth = 0;
 let cardStep = 0;
@@ -187,6 +188,11 @@ function measure() {
   applyEffect();
 }
 
+function stopControl() {
+  isUserControlling = false;
+  speed = 0;
+}
+
 window.addEventListener('load', measure);
 window.addEventListener('resize', measure);
 
@@ -197,7 +203,7 @@ window.addEventListener('mousemove', (e) => {
   const insideContainerHeight = e.clientY >= rect.top && e.clientY <= rect.bottom;
 
   if (!insideContainerHeight) {
-    speed = 0;
+    stopControl();
     return;
   }
 
@@ -205,12 +211,19 @@ window.addEventListener('mousemove', (e) => {
   const clamped = Math.max(-1, Math.min(1, normalized));
   const distance = Math.abs(clamped);
 
+  if (distance <= DEAD_ZONE) {
+    stopControl();
+    return;
+  }
+
+  isUserControlling = true;
+
   let magnitude = 0;
 
-  if (distance > DEAD_ZONE && distance <= PEAK_ZONE) {
+  if (distance <= PEAK_ZONE) {
     const t = (distance - DEAD_ZONE) / (PEAK_ZONE - DEAD_ZONE);
     magnitude = MAX_SPEED * Math.pow(t, 1.35);
-  } else if (distance > PEAK_ZONE) {
+  } else {
     const t = (distance - PEAK_ZONE) / (1 - PEAK_ZONE);
     magnitude = MAX_SPEED + (EDGE_SPEED - MAX_SPEED) * t;
   }
@@ -218,14 +231,12 @@ window.addEventListener('mousemove', (e) => {
   speed = Math.sign(clamped) * magnitude;
 });
 
-window.addEventListener('mouseleave', () => {
-  speed = 0;
-});
+window.addEventListener('mouseleave', stopControl);
 
 /* animation */
 function animate() {
   if (totalWidth) {
-    if (Math.abs(speed) > 0.001) {
+    if (isUserControlling) {
       position = wrap(position + speed, totalWidth);
     } else {
       const snapTarget = Math.round(position / cardStep) * cardStep;
