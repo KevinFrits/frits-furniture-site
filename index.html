@@ -12,7 +12,6 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #fff;
-  overflow-x: hidden;
 }
 
 /* HERO */
@@ -40,24 +39,25 @@ body {
 .slider-container {
   width: 70%;
   margin: auto;
-  overflow: hidden;
-  position: relative;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+  cursor: grab;
+  scroll-behavior: auto;
 }
 
-/* TRACK */
-.track {
-  display: flex;
-  width: max-content;
-  will-change: transform;
+.slider-container::-webkit-scrollbar {
+  display: none;
 }
 
-/* CARD */
+/* ITEM */
 .card {
-  flex: 0 0 260px;
+  display: inline-block;
+  width: 260px;
   height: 225px;
   margin: 0 -60px;
-  overflow: hidden;
   border-radius: 14px;
+  overflow: hidden;
 }
 
 .card img {
@@ -78,13 +78,11 @@ body {
 <div class="section">
   <h2 style="text-align:center;">Portfolio</h2>
 
-  <div class="slider-container">
-    <div class="track" id="track"></div>
-  </div>
+  <div class="slider-container" id="slider"></div>
 </div>
 
 <script>
-const track = document.getElementById('track');
+const slider = document.getElementById('slider');
 
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
@@ -92,51 +90,49 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// 🔁 DUPLICATE TWICE (key to true infinite loop)
+// 🔁 duplicate for seamless loop
 function build() {
   for (let i = 0; i < 2; i++) {
     images.forEach(src => {
-      const card = document.createElement('div');
-      card.className = 'card';
+      const div = document.createElement('div');
+      div.className = 'card';
 
       const img = document.createElement('img');
       img.src = src;
 
-      card.appendChild(img);
-      track.appendChild(card);
+      div.appendChild(img);
+      slider.appendChild(div);
     });
   }
 }
 build();
 
-let x = 0;
-const speedBase = 0.5;
-
-// measure half width AFTER layout is stable
-let halfWidth = 0;
-
+// wait for layout
 window.addEventListener('load', () => {
-  halfWidth = track.scrollWidth / 2;
+  slider.scrollLeft = slider.scrollWidth / 4;
 });
 
-// mouse controls
+// ===== MOUSE CONTROLS SPEED =====
+let speed = 0;
+
 document.addEventListener('mousemove', (e) => {
-  const percent = e.clientX / window.innerWidth;
-  const direction = percent - 0.5;
-
-  x += direction * 10;
+  const x = e.clientX / window.innerWidth;
+  speed = (x - 0.5) * 20; // adjust sensitivity
 });
 
-// animation loop
+// ===== LOOP ENGINE =====
 function animate() {
-  x -= speedBase;
+  slider.scrollLeft += speed;
 
-  // 🔥 seamless loop reset (NO jump visible)
-  if (halfWidth > 0 && Math.abs(x) >= halfWidth) {
-    x = 0;
+  const max = slider.scrollWidth / 2;
+
+  // 🔥 seamless reset
+  if (slider.scrollLeft >= max) {
+    slider.scrollLeft -= max;
   }
-
-  track.style.transform = `translateX(${x}px)`;
+  if (slider.scrollLeft <= 0) {
+    slider.scrollLeft += max;
+  }
 
   requestAnimationFrame(animate);
 }
