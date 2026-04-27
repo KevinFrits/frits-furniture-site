@@ -142,15 +142,17 @@ let isUserControlling = false;
 let snapTarget = null;
 
 const MAX_SPEED = 16;
-const DEAD_ZONE = 0.1875;      /* 25% wider than 0.15 */
-const PEAK_ZONE = 0.40;        /* where speed peaks */
-const OUTER_DEAD_ZONE = 0.90;  /* fades back to no scrolling near edges */
+const DEAD_ZONE = 0.1875;
+const PEAK_ZONE = 0.40;
+const OUTER_DEAD_ZONE = 0.90;
 const SNAP_STRENGTH = 0.2;
 const SNAP_THRESHOLD = 0.35;
 
 let cardWidth = 0;
 let cardStep = 0;
 let totalWidth = 0;
+let cardMarginLeft = 0;
+let cardMarginRight = 0;
 
 /* BUILD */
 images.forEach(src => {
@@ -178,11 +180,11 @@ function measure() {
 
   const firstCard = cards[0];
   const styles = getComputedStyle(firstCard);
-  const marginLeft = parseFloat(styles.marginLeft);
-  const marginRight = parseFloat(styles.marginRight);
 
+  cardMarginLeft = parseFloat(styles.marginLeft);
+  cardMarginRight = parseFloat(styles.marginRight);
   cardWidth = firstCard.offsetWidth;
-  cardStep = cardWidth + marginLeft + marginRight;
+  cardStep = cardWidth + cardMarginLeft + cardMarginRight;
   totalWidth = cardStep * cards.length;
 
   position = wrap(position, totalWidth);
@@ -294,16 +296,15 @@ animate();
 function applyEffect() {
   if (!totalWidth) return;
 
-  const containerRect = container.getBoundingClientRect();
-  const viewportCenterX = window.innerWidth / 2;
-  const localCenterX = viewportCenterX - containerRect.left;
+  const containerCenterX = container.clientWidth / 2;
 
   cards.forEach((card, index) => {
     const relativeX = wrapCentered((index * cardStep) - position, totalWidth);
-    const x = localCenterX - (cardWidth / 2) + relativeX;
-    const cardCenterX = containerRect.left + x + (cardWidth / 2);
 
-    const dist = cardCenterX - viewportCenterX;
+    const x = containerCenterX - cardMarginLeft - (cardWidth / 2) + relativeX;
+    const cardCenterX = x + cardMarginLeft + (cardWidth / 2);
+
+    const dist = cardCenterX - containerCenterX;
     const abs = Math.abs(dist);
 
     let scale = 1 - (abs / 500);
