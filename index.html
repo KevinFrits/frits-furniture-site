@@ -52,11 +52,17 @@ body {
 .slider {
   display: flex;
   will-change: transform;
+  position: relative;
+  height: 225px;
 }
 
 /* CARDS */
 .card {
+  position: absolute;
+  left: 0;
+  top: 0;
   flex: 0 0 260px;
+  width: 260px;
   height: 225px;
   margin: 0 -60px;
   border-radius: 14px;
@@ -119,128 +125,96 @@ const container = document.getElementById('container');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
 
-/* IMAGES */
-const images = [
+const sourceImages = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
   "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-/* BUILD THREE IDENTICAL COPIES */
-for (let set = 0; set < 3; set++) {
-  images.forEach(src => {
-    const card = document.createElement('div');
-    card.className = 'card';
+/* 40 images long */
+const images = Array.from({ length: 40 }, (_, i) => sourceImages[i % sourceImages.length]);
 
-    const img = document.createElement('img');
-    img.src = src;
-
-    card.appendChild(img);
-    slider.appendChild(card);
-  });
-}
-
-/* ===== TRUE INFINITE LOOP ===== */
-let x = 0;
+let cards = [];
+let position = 0;
 let speed = 0;
 const MAX_SPEED = 35;
-let loopWidth = 0;
 
-function setupLoop() {
-  const firstCard = slider.children[0];
-  const firstCardSecondSet = slider.children[images.length];
+let cardWidth = 0;
+let cardStep = 0;
+let totalWidth = 0;
+let baseOffset = 0;
 
-  if (!firstCard || !firstCardSecondSet) return;
+/* BUILD */
+images.forEach(src => {
+  const card = document.createElement('div');
+  card.className = 'card';
 
-  loopWidth = firstCardSecondSet.offsetLeft - firstCard.offsetLeft;
+  const img = document.createElement('img');
+  img.src = src;
 
-  if (x === 0) {
-    x = loopWidth;
-  }
-
-  while (x < loopWidth) x += loopWidth;
-  while (x >= loopWidth * 2) x -= loopWidth;
-
-  slider.style.transform = `translateX(${-x}px)`;
-}
-
-window.addEventListener('load', setupLoop);
-window.addEventListener('resize', setupLoop);
-setupLoop();
-
-/* mouse control */
-container.addEventListener('mousemove', (e) => {
-  const rect = container.getBoundingClientRect();
-  const percent = (e.clientX - rect.left) / rect.width;
-
-  speed = (percent - 0.5) * MAX_SPEED;
+  card.appendChild(img);
+  slider.appendChild(card);
+  cards.push(card);
 });
 
-container.addEventListener('mouseleave', () => {
+function wrap(value, size) {
+  return ((value % size) + size) % size;
+}
+
+function measure() {
+  if (!cards.length) return;
+
+  const firstCard = cards[0];
+  const styles = getComputedStyle(firstCard);
+  const marginLeft = parseFloat(styles.marginLeft);
+  const marginRight = parseFloat(styles.marginRight);
+
+  cardWidth = firstCard.offsetWidth;
+  cardStep = cardWidth + marginLeft + marginRight;
+  totalWidth = cardStep * cards.length;
+
+  /* start with a few cards already to the left of center */
+  baseOffset = ((container.clientWidth - cardWidth) / 2) - (cardStep * 2);
+
+  applyEffect();
+}
+
+window.addEventListener('load', measure);
+window.addEventListener('resize', measure);
+
+/* mouse control uses FULL SCREEN width */
+window.addEventListener('mousemove', (e) => {
+  const percent = (e.clientX / window.innerWidth) - 0.5;
+  speed = percent * MAX_SPEED;
+});
+
+window.addEventListener('mouseleave', () => {
   speed = 0;
 });
 
 /* animation */
 function animate() {
-  x += speed;
-
-  if (loopWidth) {
-    while (x < loopWidth) x += loopWidth;
-    while (x >= loopWidth * 2) x -= loopWidth;
+  if (totalWidth) {
+    position = wrap(position + speed, totalWidth);
+    applyEffect();
   }
 
-  slider.style.transform = `translateX(${-x}px)`;
-
-  applyEffect();
   requestAnimationFrame(animate);
 }
 animate();
 
-/* EFFECT */
+/* EFFECT + TRUE INFINITE RING POSITIONING */
 function applyEffect() {
-  const cards = document.querySelectorAll('.card');
+  if (!totalWidth) return;
+
+  const containerRect = container.getBoundingClientRect();
   const center = window.innerWidth / 2;
 
-  cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    const c = rect.left + rect.width / 2;
+  cards.forEach((card, index) => {
+    const ringX = wrap((index * cardStep) - position, totalWidth);
+    const x = baseOffset + ringX;
+
+    const c = containerRect.left + x + (cardWidth / 2);
     const dist = c - center;
     const abs = Math.abs(dist);
 
@@ -250,6 +224,7 @@ function applyEffect() {
     let y = Math.pow(dist / 200, 2) * 10;
     let rotate = dist / 25;
 
+    card.style.left = `${x}px`;
     card.style.transform = `
       translateY(${y}px)
       scale(${scale})
