@@ -40,18 +40,18 @@ body {
 .viewport {
   width: 70%;
   margin: auto;
-  overflow: hidden;
-  position: relative;
-}
-
-/* TRACK */
-.track {
+  overflow-x: scroll;
+  overflow-y: hidden;
   display: flex;
-  width: max-content;
-  will-change: transform;
+  scroll-behavior: auto;
+  cursor: grab;
 }
 
-/* CARD */
+.viewport::-webkit-scrollbar {
+  display: none;
+}
+
+/* ITEM */
 .card {
   flex: 0 0 260px;
   height: 225px;
@@ -78,13 +78,10 @@ body {
 <div class="section">
   <h2 style="text-align:center;">Portfolio</h2>
 
-  <div class="viewport" id="viewport">
-    <div class="track" id="track"></div>
-  </div>
+  <div class="viewport" id="viewport"></div>
 </div>
 
 <script>
-const track = document.getElementById('track');
 const viewport = document.getElementById('viewport');
 
 const images = [
@@ -93,63 +90,56 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// ===== BUILD (duplicate once) =====
-for (let i = 0; i < 2; i++) {
-  images.forEach(src => {
-    const card = document.createElement('div');
-    card.className = 'card';
+// ===== BUILD DOUBLE SET =====
+function build() {
+  for (let i = 0; i < 2; i++) {
+    images.forEach(src => {
+      const card = document.createElement('div');
+      card.className = 'card';
 
-    const img = document.createElement('img');
-    img.src = src;
+      const img = document.createElement('img');
+      img.src = src;
 
-    card.appendChild(img);
-    track.appendChild(card);
-  });
+      card.appendChild(img);
+      viewport.appendChild(card);
+    });
+  }
 }
+build();
 
-// ===== STATE =====
-let x = 0;
-let velocity = 0;
-const MAX_SPEED = 25;
+// wait until layout exists
+window.addEventListener('load', () => {
+  viewport.scrollLeft = viewport.scrollWidth / 2;
+});
 
-// smooth physics
-const lerp = (a, b, n) => a + (b - a) * n;
+// ===== MOUSE SPEED CONTROL =====
+let speed = 0;
 
-// ===== MOUSE CONTROLS =====
 viewport.addEventListener('mousemove', (e) => {
   const rect = viewport.getBoundingClientRect();
-  const percent = (e.clientX - rect.left) / rect.width;
+  const x = (e.clientX - rect.left) / rect.width;
 
-  const target = (percent - 0.5) * MAX_SPEED;
-  velocity = lerp(velocity, target, 0.1);
+  speed = (x - 0.5) * 25;
 });
 
 viewport.addEventListener('mouseleave', () => {
-  velocity = lerp(velocity, 0, 0.2);
+  speed = 0;
 });
 
-// ===== LOOP WIDTH (safe estimate) =====
-let halfWidth = 0;
-
-window.addEventListener('load', () => {
-  halfWidth = track.scrollWidth / 2;
-  x = halfWidth;
-});
-
-// ===== ANIMATION =====
+// ===== INFINITE LOOP ENGINE =====
 function animate() {
-  x += velocity;
+  viewport.scrollLeft += speed;
 
-  // 🔥 seamless infinite loop
-  if (halfWidth && x >= halfWidth * 2) {
-    x -= halfWidth;
+  const half = viewport.scrollWidth / 2;
+
+  // 🔥 true seamless loop
+  if (viewport.scrollLeft >= half) {
+    viewport.scrollLeft -= half;
   }
 
-  if (halfWidth && x <= 0) {
-    x += halfWidth;
+  if (viewport.scrollLeft <= 0) {
+    viewport.scrollLeft += half;
   }
-
-  track.style.transform = `translateX(${-x}px)`;
 
   requestAnimationFrame(animate);
 }
