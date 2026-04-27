@@ -123,11 +123,48 @@ const modalImg = document.getElementById('modalImg');
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
   "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"
 ];
 
-/* BUILD */
-function addSet() {
+/* BUILD THREE IDENTICAL COPIES */
+for (let set = 0; set < 3; set++) {
   images.forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -140,28 +177,33 @@ function addSet() {
   });
 }
 
-/* start with 2 sets so we can measure one full loop */
-addSet();
-addSet();
-
-/* ===== INFINITE LOOP (CLEAN TRANSFORM SYSTEM) ===== */
+/* ===== TRUE INFINITE LOOP ===== */
 let x = 0;
 let speed = 0;
 const MAX_SPEED = 35;
 let loopWidth = 0;
 
-/* wait for layout */
-window.addEventListener('load', () => {
+function setupLoop() {
   const firstCard = slider.children[0];
   const firstCardSecondSet = slider.children[images.length];
 
+  if (!firstCard || !firstCardSecondSet) return;
+
   loopWidth = firstCardSecondSet.offsetLeft - firstCard.offsetLeft;
 
-  /* add enough extra sets so there is never empty space */
-  while (slider.scrollWidth < container.offsetWidth + loopWidth) {
-    addSet();
+  if (x === 0) {
+    x = loopWidth;
   }
-});
+
+  while (x < loopWidth) x += loopWidth;
+  while (x >= loopWidth * 2) x -= loopWidth;
+
+  slider.style.transform = `translateX(${-x}px)`;
+}
+
+window.addEventListener('load', setupLoop);
+window.addEventListener('resize', setupLoop);
+setupLoop();
 
 /* mouse control */
 container.addEventListener('mousemove', (e) => {
@@ -180,8 +222,8 @@ function animate() {
   x += speed;
 
   if (loopWidth) {
-    x = x % loopWidth;
-    if (x < 0) x += loopWidth;
+    while (x < loopWidth) x += loopWidth;
+    while (x >= loopWidth * 2) x -= loopWidth;
   }
 
   slider.style.transform = `translateX(${-x}px)`;
