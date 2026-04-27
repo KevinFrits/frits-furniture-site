@@ -8,84 +8,199 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  color: #111;
+  overflow-x: hidden;
 }
 
+/* HERO */
 .hero {
+  position: relative;
   height: 100vh;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 100%;
+  height: 140%;
+  background-image: url("https://fritsfurnituredesign.com/Images/hero.jpg");
+  background-size: cover;
+  background-position: center;
+  transform: translateY(0);
+}
+
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: url("https://fritsfurnituredesign.com/Images/hero.jpg") center/cover;
   color: white;
-  font-size: 42px;
+  text-align: center;
 }
 
-/* viewport */
-.wrap {
-  width: 70%;
+.hero h1 {
+  font-size: 48px;
+  margin: 0;
+}
+
+.hero p {
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+/* SECTIONS */
+.section {
+  padding: 100px 20px;
+  max-width: 1100px;
   margin: auto;
-  overflow-x: auto;
-  display: flex;
-  scroll-behavior: smooth;
 }
 
-.wrap::-webkit-scrollbar {
-  display: none;
+/* FADE IN */
+.fade {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease;
 }
 
-/* cards */
+.fade.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
 .card {
-  flex: 0 0 260px;
-  height: 225px;
-  margin: 0 -40px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  background: white;
 }
 
 .card img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  display: block;
+}
+
+/* BEFORE AFTER */
+.ba {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ba img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+}
+
+/* CONTACT */
+.contact {
+  text-align: center;
+  padding: 80px 20px;
+  background: #f9f9f9;
+}
+
+button {
+  padding: 14px 24px;
+  border: none;
+  background: #111;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="hero">Frits Furniture Design</div>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <h1>Frits Furniture Design</h1>
+    <p>Modern Restored Furniture • Dallas, Texas</p>
+  </div>
+</div>
 
-<div class="wrap" id="wrap"></div>
+<!-- PORTFOLIO GRID -->
+<div class="section fade">
+  <h2>Portfolio</h2>
+
+  <div class="grid">
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg">
+    </div>
+
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg">
+    </div>
+
+    <div class="card">
+      <img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg">
+    </div>
+  </div>
+</div>
+
+<!-- BEFORE / AFTER -->
+<div class="section fade">
+  <h2>Restoration Work</h2>
+
+  <div class="ba">
+    <img src="https://fritsfurnituredesign.com/Images/PXL_20260412_014229567~2.jpg">
+    <img src="https://fritsfurnituredesign.com/Images/PXL_20251222_212118115~2.jpg">
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="contact fade">
+  <h2>Interested in a piece?</h2>
+  <p>Message me to check availability or custom work.</p>
+  <button onclick="window.location.href='https://facebook.com'">
+    Message on Facebook
+  </button>
+</div>
 
 <script>
-const wrap = document.getElementById("wrap");
+// fade-in
+const elements = document.querySelectorAll('.fade');
 
-const images = [
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
-];
-
-// build (just duplicate for flow, no infinite logic)
-for (let i = 0; i < 3; i++) {
-  images.forEach(src => {
-    const div = document.createElement("div");
-    div.className = "card";
-
-    const img = document.createElement("img");
-    img.src = src;
-
-    div.appendChild(img);
-    wrap.appendChild(div);
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show');
+    }
   });
-}
+}, { threshold: 0.2 });
 
-// simple mouse-driven scroll (NO physics, NO loop)
-let lastX = 0;
+elements.forEach(el => observer.observe(el));
 
-document.addEventListener("mousemove", (e) => {
-  const dx = e.clientX - lastX;
-  lastX = e.clientX;
+// parallax
+const heroBg = document.querySelector('.hero-bg');
 
-  wrap.scrollLeft += dx * 0.3;
+window.addEventListener('scroll', () => {
+  let scrollY = window.scrollY;
+  heroBg.style.transform = `translateY(${scrollY * 0.3}px)`;
 });
 </script>
 
