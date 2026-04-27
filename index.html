@@ -143,6 +143,8 @@ const MAX_SPEED = 26;
 const EDGE_SPEED = 5;
 const DEAD_ZONE = 0.12;
 const PEAK_ZONE = 0.28;
+const SNAP_STRENGTH = 0.14;
+const SNAP_THRESHOLD = 0.15;
 
 let cardWidth = 0;
 let cardStep = 0;
@@ -223,7 +225,19 @@ window.addEventListener('mouseleave', () => {
 /* animation */
 function animate() {
   if (totalWidth) {
-    position = wrap(position + speed, totalWidth);
+    if (Math.abs(speed) > 0.001) {
+      position = wrap(position + speed, totalWidth);
+    } else {
+      const snapTarget = Math.round(position / cardStep) * cardStep;
+      const delta = wrapCentered(snapTarget - position, totalWidth);
+
+      if (Math.abs(delta) > SNAP_THRESHOLD) {
+        position = wrap(position + delta * SNAP_STRENGTH, totalWidth);
+      } else {
+        position = wrap(snapTarget, totalWidth);
+      }
+    }
+
     applyEffect();
   }
 
