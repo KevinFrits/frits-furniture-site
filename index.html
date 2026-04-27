@@ -139,13 +139,14 @@ let cards = [];
 let position = 0;
 let speed = 0;
 let isUserControlling = false;
+let snapTarget = null;
 
 const MAX_SPEED = 26;
 const EDGE_SPEED = 5;
 const DEAD_ZONE = 0.15;
 const PEAK_ZONE = 0.35;
-const SNAP_STRENGTH = 0.22;
-const SNAP_THRESHOLD = 0.08;
+const SNAP_STRENGTH = 0.2;
+const SNAP_THRESHOLD = 0.35;
 
 let cardWidth = 0;
 let cardStep = 0;
@@ -185,10 +186,40 @@ function measure() {
   totalWidth = cardStep * cards.length;
 
   position = wrap(position, totalWidth);
+
+  if (!isUserControlling) {
+    snapTarget = getClosestSnapTarget();
+  }
+
   applyEffect();
 }
 
-function stopControl() {
+function getClosestSnapTarget() {
+  if (!totalWidth) return null;
+
+  let closestIndex = 0;
+  let closestDistance = Infinity;
+
+  cards.forEach((card, index) => {
+    const relativeX = wrapCentered((index * cardStep) - position, totalWidth);
+    const distance = Math.abs(relativeX);
+
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestIndex = index;
+    }
+  });
+
+  return wrap(closestIndex * cardStep, totalWidth);
+}
+
+function startSnap() {
+  if (!totalWidth) return;
+
+  if (isUserControlling || snapTarget === null) {
+    snapTarget = getClosestSnapTarget();
+  }
+
   isUserControlling = false;
   speed = 0;
 }
@@ -203,7 +234,7 @@ window.addEventListener('mousemove', (e) => {
   const insideContainerHeight = e.clientY >= rect.top && e.clientY <= rect.bottom;
 
   if (!insideContainerHeight) {
-    stopControl();
+    startSnap();
     return;
   }
 
@@ -212,11 +243,12 @@ window.addEventListener('mousemove', (e) => {
   const distance = Math.abs(clamped);
 
   if (distance <= DEAD_ZONE) {
-    stopControl();
+    startSnap();
     return;
   }
 
   isUserControlling = true;
+  snapTarget = null;
 
   let magnitude = 0;
 
@@ -231,21 +263,21 @@ window.addEventListener('mousemove', (e) => {
   speed = Math.sign(clamped) * magnitude;
 });
 
-window.addEventListener('mouseleave', stopControl);
+window.addEventListener('mouseleave', startSnap);
 
 /* animation */
 function animate() {
   if (totalWidth) {
     if (isUserControlling) {
       position = wrap(position + speed, totalWidth);
-    } else {
-      const snapTarget = Math.round(position / cardStep) * cardStep;
+    } else if (snapTarget !== null) {
       const delta = wrapCentered(snapTarget - position, totalWidth);
 
       if (Math.abs(delta) > SNAP_THRESHOLD) {
-        position = wrap(position + delta * SNAP_STRENGTH, totalWidth);
+        position = wrap(position + (delta * SNAP_STRENGTH), totalWidth);
       } else {
         position = wrap(snapTarget, totalWidth);
+        snapTarget = null;
       }
     }
 
@@ -266,7 +298,6 @@ function applyEffect() {
 
   cards.forEach((card, index) => {
     const relativeX = wrapCentered((index * cardStep) - position, totalWidth);
-
     const x = localCenterX - (cardWidth / 2) + relativeX;
     const cardCenterX = containerRect.left + x + (cardWidth / 2);
 
