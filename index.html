@@ -12,7 +12,6 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: #fff;
-  overflow-x: hidden;
 }
 
 /* HERO */
@@ -46,16 +45,17 @@ body {
   width: 70%;
   margin: auto;
   overflow: hidden;
-  position: relative;
   cursor: grab;
 }
 
-/* TRACK */
-.track {
+/* SCROLLER */
+.slider {
   display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
   gap: 0;
-  will-change: transform;
 }
+.slider::-webkit-scrollbar { display: none; }
 
 /* CARDS */
 .card {
@@ -105,7 +105,7 @@ body {
   <h2 style="text-align:center;">Featured Pieces</h2>
 
   <div class="slider-container" id="container">
-    <div class="track" id="track"></div>
+    <div class="slider" id="slider"></div>
   </div>
 </div>
 
@@ -114,7 +114,7 @@ body {
 </div>
 
 <script>
-const track = document.getElementById('track');
+const slider = document.getElementById('slider');
 const container = document.getElementById('container');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
@@ -126,10 +126,8 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// ===== BUILD (duplicate for infinite) =====
-let cards = [];
-
-for (let i = 0; i < 3; i++) {
+// build (repeat for infinite feel)
+for (let i = 0; i < 6; i++) {
   images.forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -138,87 +136,56 @@ for (let i = 0; i < 3; i++) {
     img.src = src;
 
     card.appendChild(img);
-    track.appendChild(card);
-    cards.push(card);
+    slider.appendChild(card);
   });
 }
 
-// ===== DRAG SYSTEM =====
+// start in middle
+slider.scrollLeft = slider.scrollWidth / 2;
+
+// ===== DRAG SCROLL =====
 let isDown = false;
 let startX;
-let currentX = 0;
+let scrollStart;
 
-container.addEventListener('mousedown', e => {
+container.addEventListener('mousedown', (e) => {
   isDown = true;
-  startX = e.clientX;
+  startX = e.pageX;
+  scrollStart = slider.scrollLeft;
   container.style.cursor = 'grabbing';
 });
 
 window.addEventListener('mouseup', () => {
   isDown = false;
   container.style.cursor = 'grab';
-  snapToCenter();
 });
 
-window.addEventListener('mousemove', e => {
+window.addEventListener('mousemove', (e) => {
   if (!isDown) return;
 
-  const delta = e.clientX - startX;
-  startX = e.clientX;
-
-  currentX += delta;
-  track.style.transform = `translateX(${currentX}px)`;
-
-  applyEffects();
-  infiniteLoop();
+  const dx = e.pageX - startX;
+  slider.scrollLeft = scrollStart - dx;
 });
 
 // ===== INFINITE LOOP =====
-function infiniteLoop() {
-  const width = track.scrollWidth / 3;
+slider.addEventListener('scroll', () => {
+  const max = slider.scrollWidth;
+  const current = slider.scrollLeft;
 
-  if (currentX > width) {
-    currentX -= width;
+  if (current < max * 0.25) {
+    slider.scrollLeft = current + max * 0.5;
   }
-  if (currentX < -width) {
-    currentX += width;
+
+  if (current > max * 0.75) {
+    slider.scrollLeft = current - max * 0.5;
   }
-}
 
-// ===== SNAP =====
-function snapToCenter() {
-  let closest = null;
-  let closestDist = Infinity;
+  applyEffect();
+});
 
-  cards.forEach(card => {
-    const rect = card.getBoundingClientRect();
-    const center = rect.left + rect.width / 2;
-    const screenCenter = window.innerWidth / 2;
-
-    const dist = Math.abs(center - screenCenter);
-
-    if (dist < closestDist) {
-      closestDist = dist;
-      closest = card;
-    }
-  });
-
-  if (closest) {
-    const rect = closest.getBoundingClientRect();
-    const offset = rect.left + rect.width / 2 - window.innerWidth / 2;
-    currentX -= offset;
-
-    track.style.transition = "transform 0.4s ease";
-    track.style.transform = `translateX(${currentX}px)`;
-
-    setTimeout(() => {
-      track.style.transition = "none";
-    }, 400);
-  }
-}
-
-// ===== EFFECT =====
-function applyEffects() {
+// ===== VISUAL EFFECT =====
+function applyEffect() {
+  const cards = document.querySelectorAll('.card');
   const center = window.innerWidth / 2;
 
   cards.forEach(card => {
@@ -244,12 +211,15 @@ function applyEffects() {
   });
 }
 
+// run once
+setTimeout(applyEffect, 100);
+
 // ===== MODAL =====
-cards.forEach(card => {
-  card.addEventListener('click', () => {
+slider.addEventListener('click', (e) => {
+  if (e.target.tagName === 'IMG') {
     modal.classList.add('show');
-    modalImg.src = card.querySelector('img').src;
-  });
+    modalImg.src = e.target.src;
+  }
 });
 
 modal.onclick = () => modal.classList.remove('show');
