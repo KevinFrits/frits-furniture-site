@@ -45,16 +45,13 @@ body {
   width: 70%;
   margin: auto;
   overflow: hidden;
+  position: relative;
 }
 
 /* SLIDER */
 .slider {
   display: flex;
-  overflow-x: auto;
-  scroll-behavior: auto;
-}
-.slider::-webkit-scrollbar {
-  display: none;
+  will-change: transform;
 }
 
 /* CARDS */
@@ -130,7 +127,7 @@ const images = [
 ];
 
 /* BUILD (duplicate for seamless loop) */
-for (let i = 0; i < 6; i++) {
+for (let i = 0; i < 2; i++) {
   images.forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -143,25 +140,21 @@ for (let i = 0; i < 6; i++) {
   });
 }
 
-/* ===== INFINITE LOOP FIX ===== */
+/* ===== INFINITE LOOP (CLEAN TRANSFORM SYSTEM) ===== */
+let x = 0;
+let speed = 0;
+const MAX_SPEED = 35;
 let halfWidth = 0;
 
+/* wait for layout */
 window.addEventListener('load', () => {
-  // wait for layout to fully render
   halfWidth = slider.scrollWidth / 2;
-
-  // start in the middle section (important for smooth loop)
-  slider.scrollLeft = halfWidth;
 });
 
-/* ===== MOUSE CONTROL ===== */
-let speed = 0;
-const MAX_SPEED = 40;
-
+/* mouse control */
 container.addEventListener('mousemove', (e) => {
   const rect = container.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const percent = x / rect.width;
+  const percent = (e.clientX - rect.left) / rect.width;
 
   speed = (percent - 0.5) * MAX_SPEED;
 });
@@ -170,35 +163,23 @@ container.addEventListener('mouseleave', () => {
   speed = 0;
 });
 
-/* ===== ANIMATION LOOP ===== */
+/* animation */
 function animate() {
-  slider.scrollLeft += speed;
+  x += speed;
 
-  handleInfinite();
+  if (halfWidth) {
+    if (x >= halfWidth) x -= halfWidth;
+    if (x <= 0) x += halfWidth;
+  }
+
+  slider.style.transform = `translateX(${-x}px)`;
+
   applyEffect();
-
   requestAnimationFrame(animate);
 }
 animate();
 
-/* ===== TRUE SEAMLESS WRAP (FIXED) */
-function handleInfinite() {
-  if (!halfWidth) return;
-
-  const current = slider.scrollLeft;
-
-  // wrap right
-  if (current >= halfWidth * 2) {
-    slider.scrollLeft = halfWidth;
-  }
-
-  // wrap left
-  if (current <= 0) {
-    slider.scrollLeft = halfWidth;
-  }
-}
-
-/* ===== VISUAL EFFECT ===== */
+/* EFFECT */
 function applyEffect() {
   const cards = document.querySelectorAll('.card');
   const center = window.innerWidth / 2;
@@ -226,7 +207,7 @@ function applyEffect() {
   });
 }
 
-/* ===== MODAL ===== */
+/* MODAL */
 slider.addEventListener('click', (e) => {
   if (e.target.tagName === 'IMG') {
     modal.classList.add('show');
