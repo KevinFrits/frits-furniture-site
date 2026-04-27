@@ -139,8 +139,10 @@ let cards = [];
 let position = 0;
 let speed = 0;
 
-const MAX_SPEED = 79;
-const ACCELERATION = 6;
+const MAX_SPEED = 52;
+const EDGE_SPEED = 10;
+const DEAD_ZONE = 0.03;
+const PEAK_ZONE = 0.18;
 
 let cardWidth = 0;
 let cardStep = 0;
@@ -199,9 +201,19 @@ window.addEventListener('mousemove', (e) => {
 
   const normalized = (e.clientX - (window.innerWidth / 2)) / (window.innerWidth / 2);
   const clamped = Math.max(-1, Math.min(1, normalized));
-  const magnitude = Math.pow(Math.abs(clamped), ACCELERATION);
+  const distance = Math.abs(clamped);
 
-  speed = Math.sign(clamped) * magnitude * MAX_SPEED;
+  let magnitude = 0;
+
+  if (distance > DEAD_ZONE && distance <= PEAK_ZONE) {
+    const t = (distance - DEAD_ZONE) / (PEAK_ZONE - DEAD_ZONE);
+    magnitude = MAX_SPEED * Math.pow(t, 0.65);
+  } else if (distance > PEAK_ZONE) {
+    const t = (distance - PEAK_ZONE) / (1 - PEAK_ZONE);
+    magnitude = MAX_SPEED + (EDGE_SPEED - MAX_SPEED) * t;
+  }
+
+  speed = Math.sign(clamped) * magnitude;
 });
 
 window.addEventListener('mouseleave', () => {
