@@ -173,7 +173,6 @@ function measure() {
   cardStep = cardWidth + marginLeft + marginRight;
   totalWidth = cardStep * cards.length;
 
-  /* start with a few cards already to the left of center */
   baseOffset = ((container.clientWidth - cardWidth) / 2) - (cardStep * 2);
 
   applyEffect();
@@ -182,10 +181,18 @@ function measure() {
 window.addEventListener('load', measure);
 window.addEventListener('resize', measure);
 
-/* mouse control uses FULL SCREEN width */
+/* mouse control uses FULL SCREEN width,
+   but only while cursor is within container height */
 window.addEventListener('mousemove', (e) => {
-  const percent = (e.clientX / window.innerWidth) - 0.5;
-  speed = percent * MAX_SPEED;
+  const rect = container.getBoundingClientRect();
+  const insideContainerHeight = e.clientY >= rect.top && e.clientY <= rect.bottom;
+
+  if (insideContainerHeight) {
+    const percent = (e.clientX / window.innerWidth) - 0.5;
+    speed = percent * MAX_SPEED;
+  } else {
+    speed = 0;
+  }
 });
 
 window.addEventListener('mouseleave', () => {
