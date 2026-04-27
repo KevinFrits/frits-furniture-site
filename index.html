@@ -5,187 +5,225 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Frits Furniture Design</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+
 <style>
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #ffffff;
-  color: #111;
-  overflow-x: hidden;
+  background: #fff;
 }
 
 /* HERO */
 .hero {
-  position: relative;
   height: 100vh;
-  overflow: hidden;
-}
-
-.hero-bg {
-  position: absolute;
-  top: -20%;
-  left: 0;
-  width: 100%;
-  height: 140%;
-  background-image: url("https://fritsfurnituredesign.com/Images/hero.jpg");
-  background-size: cover;
-  background-position: center;
-}
-
-.hero-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.25);
-}
-
-/* 🔥 CORRECT LOGO (FRITS TOP, FURNITURE DESIGN BOTTOM) */
-.hero-content {
-  position: relative;
-  z-index: 2;
-  height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  background: url("https://fritsfurnituredesign.com/Images/hero.jpg") center/cover;
   color: white;
   text-align: center;
 }
 
-.hero h1 {
-  margin: 0;
-  font-size: 70px;
-  font-weight: 800;
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 56px;
+}
+.logo span {
+  display: block;
+  font-size: 14px;
   letter-spacing: 6px;
-  text-transform: uppercase;
-  line-height: 1;
 }
 
-.hero .sub {
-  margin-top: 12px;
-  font-size: 18px;
-  letter-spacing: 10px;
-  text-transform: uppercase;
-  opacity: 0.9;
-}
-
-/* SECTIONS */
+/* SECTION */
 .section {
-  padding: 100px 20px;
-  max-width: 1100px;
+  padding: 80px 0;
+}
+
+/* CONTAINER */
+.slider-container {
+  width: 70%;
   margin: auto;
-  text-align: center;
-}
-
-/* GRID */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.card {
   overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  position: relative;
 }
 
+/* TRACK */
+.track {
+  display: flex;
+  will-change: transform;
+}
+
+/* CARDS */
+.card {
+  flex: 0 0 260px;
+  height: 225px;
+  margin: 0 -60px;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
 .card img {
   width: 100%;
-  display: block;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
 }
 
-/* BEFORE AFTER */
-.ba {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  align-items: center;
   justify-content: center;
 }
-
-.ba img {
-  width: 100%;
-  max-width: 500px;
-  border-radius: 12px;
+.modal img {
+  max-width: 90%;
+  max-height: 90%;
 }
-
-/* CONTACT */
-.contact {
-  text-align: center;
-  padding: 80px 20px;
-  background: #f9f9f9;
-}
-
-button {
-  padding: 14px 24px;
-  border: none;
-  background: #111;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 20px;
+.modal.show {
+  display: flex;
 }
 </style>
 </head>
 
 <body>
 
-<!-- HERO -->
 <div class="hero">
-  <div class="hero-bg"></div>
-
-  <div class="hero-content">
-    <h1>FRITS</h1>
-    <div class="sub">Furniture Design</div>
+  <div>
+    <div class="logo">Frits <span>FURNITURE DESIGN</span></div>
+    <p>Modern Restored Furniture • Dallas, Texas</p>
   </div>
 </div>
 
-<!-- PORTFOLIO -->
 <div class="section">
-  <h2>Portfolio</h2>
+  <h2 style="text-align:center;">Portfolio</h2>
 
-  <div class="grid">
-    <div class="card">
-      <img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg">
-    </div>
-
-    <div class="card">
-      <img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg">
-    </div>
-
-    <div class="card">
-      <img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg">
-    </div>
+  <div class="slider-container" id="container">
+    <div class="track" id="track"></div>
   </div>
 </div>
 
-<!-- BEFORE AFTER -->
-<div class="section">
-  <h2>Restoration Work</h2>
-
-  <div class="ba">
-    <img src="https://fritsfurnituredesign.com/Images/PXL_20260412_014229567~2.jpg">
-    <img src="https://fritsfurnituredesign.com/Images/PXL_20251222_212118115~2.jpg">
-  </div>
-</div>
-
-<!-- CONTACT -->
-<div class="contact">
-  <h2>Interested in a piece?</h2>
-  <p>Message me to check availability or custom work.</p>
-
-  <button onclick="window.location.href='https://facebook.com'">
-    Message on Facebook
-  </button>
+<div class="modal" id="modal">
+  <img id="modalImg">
 </div>
 
 <script>
-// parallax (stable)
-const heroBg = document.querySelector('.hero-bg');
+const track = document.getElementById('track');
+const container = document.getElementById('container');
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modalImg');
 
-window.addEventListener('scroll', () => {
-  heroBg.style.transform = `translateY(${window.scrollY * 0.3}px)`;
+const images = [
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
+];
+
+// ===== BUILD TWO IDENTICAL SETS =====
+function build() {
+  images.concat(images).forEach(src => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const img = document.createElement('img');
+    img.src = src;
+
+    card.appendChild(img);
+    track.appendChild(card);
+  });
+}
+build();
+
+// ===== STATE =====
+let position = 0;
+let speed = 0;
+const MAX_SPEED = 35;
+
+// width of one full set (used for looping)
+let setWidth = 0;
+
+setTimeout(() => {
+  const cards = document.querySelectorAll('.card');
+  const singleSetCount = images.length;
+
+  for (let i = 0; i < singleSetCount; i++) {
+    setWidth += cards[i].offsetWidth;
+  }
+
+  position = setWidth;
+}, 100);
+
+// ===== MOUSE CONTROL =====
+container.addEventListener('mousemove', (e) => {
+  const rect = container.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+
+  speed = (x - 0.5) * MAX_SPEED;
 });
+
+container.addEventListener('mouseleave', () => {
+  speed = 0;
+});
+
+// ===== LOOP ENGINE =====
+function animate() {
+  position += speed;
+
+  // seamless loop reset (invisible)
+  if (position <= 0) {
+    position += setWidth;
+  }
+  if (position >= setWidth * 2) {
+    position -= setWidth;
+  }
+
+  track.style.transform = `translateX(${-position}px)`;
+
+  applyEffect();
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ===== VISUAL EFFECT =====
+function applyEffect() {
+  const cards = document.querySelectorAll('.card');
+  const center = window.innerWidth / 2;
+
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const c = rect.left + rect.width / 2;
+    const dist = c - center;
+    const abs = Math.abs(dist);
+
+    let scale = 1 - (abs / 500);
+    scale = Math.max(0.7, Math.min(1.15, scale));
+
+    let y = Math.pow(dist / 200, 2) * 10;
+    let rotate = dist / 25;
+
+    card.style.transform = `
+      translateY(${y}px)
+      scale(${scale})
+      rotateY(${rotate}deg)
+    `;
+
+    card.style.opacity = 1 - (abs / 600);
+    card.style.zIndex = Math.round(scale * 100);
+  });
+}
+
+// ===== MODAL =====
+track.addEventListener('click', (e) => {
+  if (e.target.tagName === 'IMG') {
+    modal.classList.add('show');
+    modalImg.src = e.target.src;
+  }
+});
+
+modal.onclick = () => modal.classList.remove('show');
 </script>
 
 </body>
