@@ -42,7 +42,7 @@ body {
 
 /* CONTAINER */
 .slider-container {
-  width: 70%; /* restored */
+  width: 70%;
   margin: auto;
   overflow: hidden;
 }
@@ -51,18 +51,22 @@ body {
 .slider {
   display: flex;
   overflow-x: auto;
+  scroll-behavior: auto;
 }
-.slider::-webkit-scrollbar { display: none; }
+.slider::-webkit-scrollbar {
+  display: none;
+}
 
-/* CARDS (25% shorter) */
+/* CARDS */
 .card {
   flex: 0 0 260px;
-  height: 225px; /* reduced from 300 */
+  height: 225px;
   margin: 0 -60px;
   border-radius: 14px;
   overflow: hidden;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
+
 .card img {
   width: 100%;
   height: 100%;
@@ -79,10 +83,12 @@ body {
   align-items: center;
   justify-content: center;
 }
+
 .modal img {
   max-width: 90%;
   max-height: 90%;
 }
+
 .modal.show {
   display: flex;
 }
@@ -116,14 +122,14 @@ const container = document.getElementById('container');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
 
-// ===== IMAGES =====
+/* IMAGES */
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
   "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// build
+/* BUILD (duplicate for seamless loop) */
 for (let i = 0; i < 6; i++) {
   images.forEach(src => {
     const card = document.createElement('div');
@@ -137,32 +143,36 @@ for (let i = 0; i < 6; i++) {
   });
 }
 
-// start centered
-slider.scrollLeft = slider.scrollWidth / 2;
+/* ===== INFINITE LOOP FIX ===== */
+let halfWidth = 0;
 
-// ===== MOUSE SCROLL (FIXED STRONGER) =====
+window.addEventListener('load', () => {
+  // wait for layout to fully render
+  halfWidth = slider.scrollWidth / 2;
+
+  // start in the middle section (important for smooth loop)
+  slider.scrollLeft = halfWidth;
+});
+
+/* ===== MOUSE CONTROL ===== */
 let speed = 0;
-const MAX_SPEED = 40; // increased so it actually moves
+const MAX_SPEED = 40;
 
 container.addEventListener('mousemove', (e) => {
   const rect = container.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const percent = x / rect.width;
 
-  const dist = percent - 0.5;
-
-  speed = dist * MAX_SPEED;
+  speed = (percent - 0.5) * MAX_SPEED;
 });
 
 container.addEventListener('mouseleave', () => {
   speed = 0;
 });
 
-// animation loop
+/* ===== ANIMATION LOOP ===== */
 function animate() {
-  if (Math.abs(speed) > 0.1) {
-    slider.scrollLeft += speed;
-  }
+  slider.scrollLeft += speed;
 
   handleInfinite();
   applyEffect();
@@ -171,21 +181,24 @@ function animate() {
 }
 animate();
 
-// ===== INFINITE LOOP =====
+/* ===== TRUE SEAMLESS WRAP (FIXED) */
 function handleInfinite() {
-  const max = slider.scrollWidth;
+  if (!halfWidth) return;
+
   const current = slider.scrollLeft;
 
-  if (current < max * 0.25) {
-    slider.scrollLeft = current + max * 0.5;
+  // wrap right
+  if (current >= halfWidth * 2) {
+    slider.scrollLeft = halfWidth;
   }
 
-  if (current > max * 0.75) {
-    slider.scrollLeft = current - max * 0.5;
+  // wrap left
+  if (current <= 0) {
+    slider.scrollLeft = halfWidth;
   }
 }
 
-// ===== EFFECT =====
+/* ===== VISUAL EFFECT ===== */
 function applyEffect() {
   const cards = document.querySelectorAll('.card');
   const center = window.innerWidth / 2;
@@ -213,10 +226,7 @@ function applyEffect() {
   });
 }
 
-// run once
-setTimeout(applyEffect, 100);
-
-// ===== MODAL =====
+/* ===== MODAL ===== */
 slider.addEventListener('click', (e) => {
   if (e.target.tagName === 'IMG') {
     modal.classList.add('show');
