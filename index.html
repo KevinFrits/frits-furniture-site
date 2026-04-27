@@ -36,27 +36,30 @@ body {
   padding: 80px 0;
 }
 
-/* CONTAINER */
+/* VIEWPORT */
 .slider-container {
   width: 70%;
   margin: auto;
   overflow: hidden;
+  position: relative;
 }
 
 /* TRACK */
 .track {
   display: flex;
+  width: max-content;
   will-change: transform;
 }
 
-/* CARDS */
+/* CARD */
 .card {
   flex: 0 0 260px;
   height: 225px;
   margin: 0 -60px;
-  border-radius: 14px;
   overflow: hidden;
+  border-radius: 14px;
 }
+
 .card img {
   width: 100%;
   height: 100%;
@@ -75,14 +78,13 @@ body {
 <div class="section">
   <h2 style="text-align:center;">Portfolio</h2>
 
-  <div class="slider-container" id="container">
+  <div class="slider-container">
     <div class="track" id="track"></div>
   </div>
 </div>
 
 <script>
 const track = document.getElementById('track');
-const container = document.getElementById('container');
 
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
@@ -90,76 +92,54 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-let position = 0;
-let speed = 0;
-const MAX_SPEED = 30;
-
-let setWidth = 0;
-let ready = false;
-
-// ===== BUILD DOUBLE SET =====
+// 🔁 DUPLICATE TWICE (key to true infinite loop)
 function build() {
-  images.concat(images).forEach(src => {
-    const card = document.createElement('div');
-    card.className = 'card';
+  for (let i = 0; i < 2; i++) {
+    images.forEach(src => {
+      const card = document.createElement('div');
+      card.className = 'card';
 
-    const img = document.createElement('img');
-    img.src = src;
+      const img = document.createElement('img');
+      img.src = src;
 
-    track.appendChild(card);
-    card.appendChild(img);
-  });
+      card.appendChild(img);
+      track.appendChild(card);
+    });
+  }
 }
-
 build();
 
-// ===== WAIT FOR IMAGES TO LOAD (IMPORTANT FIX) =====
+let x = 0;
+const speedBase = 0.5;
+
+// measure half width AFTER layout is stable
+let halfWidth = 0;
+
 window.addEventListener('load', () => {
-  const cards = document.querySelectorAll('.card');
-
-  // measure ONE full set reliably
-  const singleSetCount = images.length;
-
-  setWidth = 0;
-  for (let i = 0; i < singleSetCount; i++) {
-    setWidth += cards[i].offsetWidth;
-  }
-
-  position = setWidth; // start in middle set
-  ready = true;
+  halfWidth = track.scrollWidth / 2;
 });
 
-// ===== MOUSE CONTROL =====
-container.addEventListener('mousemove', (e) => {
-  const rect = container.getBoundingClientRect();
-  const x = (e.clientX - rect.left) / rect.width;
+// mouse controls
+document.addEventListener('mousemove', (e) => {
+  const percent = e.clientX / window.innerWidth;
+  const direction = percent - 0.5;
 
-  speed = (x - 0.5) * MAX_SPEED;
+  x += direction * 10;
 });
 
-container.addEventListener('mouseleave', () => {
-  speed = 0;
-});
-
-// ===== LOOP ENGINE =====
+// animation loop
 function animate() {
-  if (ready) {
-    position += speed;
+  x -= speedBase;
 
-    // BIG SAFE LOOP ZONE (prevents glitch)
-    if (position < setWidth * 0.5) {
-      position += setWidth;
-    }
-    if (position > setWidth * 1.5) {
-      position -= setWidth;
-    }
-
-    track.style.transform = `translateX(${-position}px)`;
+  // 🔥 seamless loop reset (NO jump visible)
+  if (halfWidth > 0 && Math.abs(x) >= halfWidth) {
+    x = 0;
   }
+
+  track.style.transform = `translateX(${x}px)`;
 
   requestAnimationFrame(animate);
 }
-
 animate();
 </script>
 
