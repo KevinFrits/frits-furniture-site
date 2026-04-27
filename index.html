@@ -46,13 +46,15 @@ body {
   width: 70%;
   margin: auto;
   overflow: hidden;
+  position: relative;
+  cursor: grab;
 }
 
 /* TRACK */
 .track {
   display: flex;
-  align-items: center;
-  transition: transform 0.4s ease;
+  gap: 0;
+  will-change: transform;
 }
 
 /* CARDS */
@@ -62,13 +64,13 @@ body {
   margin: 0 -60px;
   border-radius: 14px;
   overflow: hidden;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 .card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  cursor: pointer;
+  pointer-events: none;
 }
 
 /* MODAL */
@@ -124,10 +126,10 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// ===== BUILD CARDS (lots for loop illusion) =====
-let allCards = [];
+// ===== BUILD (duplicate for infinite) =====
+let cards = [];
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 3; i++) {
   images.forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -137,85 +139,92 @@ for (let i = 0; i < 10; i++) {
 
     card.appendChild(img);
     track.appendChild(card);
-    allCards.push(card);
+    cards.push(card);
   });
 }
 
-let currentIndex = Math.floor(allCards.length / 2);
-let currentTranslate = 0;
-let lastHoveredIndex = -1;
+// ===== DRAG SYSTEM =====
+let isDown = false;
+let startX;
+let currentX = 0;
 
-// ===== CENTER FUNCTION =====
-function centerCard(index) {
-  if (index === lastHoveredIndex) return; // prevent repeat trigger
-
-  const card = allCards[index];
-  const rect = card.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-
-  const offset =
-    rect.left + rect.width / 2 -
-    (containerRect.left + containerRect.width / 2);
-
-  currentTranslate -= offset;
-  track.style.transform = `translateX(${currentTranslate}px)`;
-
-  currentIndex = index;
-  lastHoveredIndex = index;
-
-  applyEffects();
-  maintainLoop();
-}
-
-// ===== LOOP RESET =====
-function maintainLoop() {
-  const total = allCards.length;
-
-  if (currentIndex < total * 0.3) {
-    currentIndex += total / 2;
-    jumpWithoutAnimation();
-  }
-
-  if (currentIndex > total * 0.7) {
-    currentIndex -= total / 2;
-    jumpWithoutAnimation();
-  }
-}
-
-function jumpWithoutAnimation() {
-  track.style.transition = "none";
-
-  const card = allCards[currentIndex];
-  const rect = card.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-
-  const offset =
-    rect.left + rect.width / 2 -
-    (containerRect.left + containerRect.width / 2);
-
-  currentTranslate -= offset;
-  track.style.transform = `translateX(${currentTranslate}px)`;
-
-  requestAnimationFrame(() => {
-    track.style.transition = "transform 0.4s ease";
-  });
-}
-
-// ===== HOVER =====
-allCards.forEach((card, index) => {
-  card.addEventListener('mouseenter', () => {
-    centerCard(index);
-  });
+container.addEventListener('mousedown', e => {
+  isDown = true;
+  startX = e.clientX;
+  container.style.cursor = 'grabbing';
 });
 
-// ===== EFFECTS =====
+window.addEventListener('mouseup', () => {
+  isDown = false;
+  container.style.cursor = 'grab';
+  snapToCenter();
+});
+
+window.addEventListener('mousemove', e => {
+  if (!isDown) return;
+
+  const delta = e.clientX - startX;
+  startX = e.clientX;
+
+  currentX += delta;
+  track.style.transform = `translateX(${currentX}px)`;
+
+  applyEffects();
+  infiniteLoop();
+});
+
+// ===== INFINITE LOOP =====
+function infiniteLoop() {
+  const width = track.scrollWidth / 3;
+
+  if (currentX > width) {
+    currentX -= width;
+  }
+  if (currentX < -width) {
+    currentX += width;
+  }
+}
+
+// ===== SNAP =====
+function snapToCenter() {
+  let closest = null;
+  let closestDist = Infinity;
+
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const screenCenter = window.innerWidth / 2;
+
+    const dist = Math.abs(center - screenCenter);
+
+    if (dist < closestDist) {
+      closestDist = dist;
+      closest = card;
+    }
+  });
+
+  if (closest) {
+    const rect = closest.getBoundingClientRect();
+    const offset = rect.left + rect.width / 2 - window.innerWidth / 2;
+    currentX -= offset;
+
+    track.style.transition = "transform 0.4s ease";
+    track.style.transform = `translateX(${currentX}px)`;
+
+    setTimeout(() => {
+      track.style.transition = "none";
+    }, 400);
+  }
+}
+
+// ===== EFFECT =====
 function applyEffects() {
   const center = window.innerWidth / 2;
 
-  allCards.forEach(card => {
+  cards.forEach(card => {
     const rect = card.getBoundingClientRect();
-    const cardCenter = rect.left + rect.width / 2;
-    const dist = cardCenter - center;
+    const c = rect.left + rect.width / 2;
+    const dist = c - center;
     const abs = Math.abs(dist);
 
     let scale = 1 - (abs / 500);
@@ -235,15 +244,12 @@ function applyEffects() {
   });
 }
 
-// initial center
-setTimeout(() => centerCard(currentIndex), 100);
-
 // ===== MODAL =====
-document.addEventListener('click', (e) => {
-  if (e.target.tagName === 'IMG') {
+cards.forEach(card => {
+  card.addEventListener('click', () => {
     modal.classList.add('show');
-    modalImg.src = e.target.src;
-  }
+    modalImg.src = card.querySelector('img').src;
+  });
 });
 
 modal.onclick = () => modal.classList.remove('show');
