@@ -53,7 +53,7 @@ body {
 .track {
   display: flex;
   align-items: center;
-  transition: transform 0.2s ease;
+  transition: transform 0.4s ease;
 }
 
 /* CARDS */
@@ -63,7 +63,8 @@ body {
   margin: 0 -60px;
   border-radius: 14px;
   overflow: hidden;
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  position: relative;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .card img {
   width: 100%;
@@ -125,8 +126,9 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// build many copies (infinite feel)
-for (let i = 0; i < 10; i++) {
+// build MANY copies for infinite illusion
+let allCards = [];
+for (let i = 0; i < 8; i++) {
   images.forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -136,34 +138,40 @@ for (let i = 0; i < 10; i++) {
 
     card.appendChild(img);
     track.appendChild(card);
+    allCards.push(card);
   });
 }
 
-const cards = document.querySelectorAll('.card');
+let currentIndex = Math.floor(allCards.length / 2);
 
-let currentOffset = 0;
+// ===== CENTER FUNCTION =====
+function centerCard(index) {
+  const card = allCards[index];
+  const rect = card.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
 
-// ===== MOUSE CONTROLS ROTATION =====
-container.addEventListener('mousemove', (e) => {
-  const rect = container.getBoundingClientRect();
-  const percent = (e.clientX - rect.left) / rect.width;
+  const offset =
+    rect.left + rect.width / 2 -
+    (containerRect.left + containerRect.width / 2);
 
-  // map mouse to scroll position
-  currentOffset = percent * track.scrollWidth;
+  track.style.transform = `translateX(${parseFloat(track.style.transform.replace(/translateX\((.*)px\)/,'$1') || 0) - offset}px)`;
 
-  updatePosition();
-});
-
-function updatePosition() {
-  track.style.transform = `translateX(${-currentOffset}px)`;
+  currentIndex = index;
   applyEffects();
 }
 
-// ===== VISUAL RING EFFECT =====
+// ===== HOVER → CENTER =====
+allCards.forEach((card, index) => {
+  card.addEventListener('mouseenter', () => {
+    centerCard(index);
+  });
+});
+
+// ===== EFFECTS =====
 function applyEffects() {
   const center = window.innerWidth / 2;
 
-  cards.forEach(card => {
+  allCards.forEach(card => {
     const rect = card.getBoundingClientRect();
     const cardCenter = rect.left + rect.width / 2;
     const dist = cardCenter - center;
@@ -185,6 +193,9 @@ function applyEffects() {
     card.style.zIndex = Math.round(scale * 100);
   });
 }
+
+// run once
+setTimeout(() => centerCard(currentIndex), 100);
 
 // ===== MODAL =====
 document.addEventListener('click', (e) => {
