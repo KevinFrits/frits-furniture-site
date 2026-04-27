@@ -139,10 +139,10 @@ let cards = [];
 let position = 0;
 let speed = 0;
 
-const MAX_SPEED = 52;
-const EDGE_SPEED = 10;
-const DEAD_ZONE = 0.03;
-const PEAK_ZONE = 0.18;
+const MAX_SPEED = 26;
+const EDGE_SPEED = 5;
+const DEAD_ZONE = 0.12;
+const PEAK_ZONE = 0.28;
 
 let cardWidth = 0;
 let cardStep = 0;
@@ -207,7 +207,7 @@ window.addEventListener('mousemove', (e) => {
 
   if (distance > DEAD_ZONE && distance <= PEAK_ZONE) {
     const t = (distance - DEAD_ZONE) / (PEAK_ZONE - DEAD_ZONE);
-    magnitude = MAX_SPEED * Math.pow(t, 0.65);
+    magnitude = MAX_SPEED * Math.pow(t, 1.35);
   } else if (distance > PEAK_ZONE) {
     const t = (distance - PEAK_ZONE) / (1 - PEAK_ZONE);
     magnitude = MAX_SPEED + (EDGE_SPEED - MAX_SPEED) * t;
