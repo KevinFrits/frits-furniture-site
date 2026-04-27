@@ -8,9 +8,7 @@
 <style>
 body {
   margin: 0;
-  background: #fff;
   font-family: Arial;
-  overflow-x: hidden;
 }
 
 .hero {
@@ -20,32 +18,27 @@ body {
   justify-content: center;
   background: url("https://fritsfurnituredesign.com/Images/hero.jpg") center/cover;
   color: white;
-  font-size: 40px;
+  font-size: 42px;
 }
 
-/* VIEWPORT */
-.viewport {
+/* viewport */
+.wrap {
   width: 70%;
   margin: auto;
-  overflow: hidden;
-  position: relative;
-  padding: 60px 0;
-}
-
-/* TRACK (this is the key) */
-.track {
+  overflow-x: auto;
   display: flex;
-  width: max-content;
-  will-change: transform;
+  scroll-behavior: smooth;
 }
 
-/* CARD */
+.wrap::-webkit-scrollbar {
+  display: none;
+}
+
+/* cards */
 .card {
   flex: 0 0 260px;
   height: 225px;
-  margin: 0 -50px;
-  border-radius: 14px;
-  overflow: hidden;
+  margin: 0 -40px;
 }
 
 .card img {
@@ -60,12 +53,10 @@ body {
 
 <div class="hero">Frits Furniture Design</div>
 
-<div class="viewport">
-  <div class="track" id="track"></div>
-</div>
+<div class="wrap" id="wrap"></div>
 
 <script>
-const track = document.getElementById("track");
+const wrap = document.getElementById("wrap");
 
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
@@ -73,58 +64,29 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// build 2 identical sets
-function build() {
-  for (let i = 0; i < 2; i++) {
-    images.forEach(src => {
-      const card = document.createElement("div");
-      card.className = "card";
+// build (just duplicate for flow, no infinite logic)
+for (let i = 0; i < 3; i++) {
+  images.forEach(src => {
+    const div = document.createElement("div");
+    div.className = "card";
 
-      const img = document.createElement("img");
-      img.src = src;
+    const img = document.createElement("img");
+    img.src = src;
 
-      card.appendChild(img);
-      track.appendChild(card);
-    });
-  }
+    div.appendChild(img);
+    wrap.appendChild(div);
+  });
 }
-build();
 
-let x = 0;
-const speed = 0.6; // constant drift (smooth base motion)
-let mouseInfluence = 0;
+// simple mouse-driven scroll (NO physics, NO loop)
+let lastX = 0;
 
-// mouse controls direction only
 document.addEventListener("mousemove", (e) => {
-  const percent = e.clientX / window.innerWidth;
-  mouseInfluence = (percent - 0.5) * 2;
+  const dx = e.clientX - lastX;
+  lastX = e.clientX;
+
+  wrap.scrollLeft += dx * 0.3;
 });
-
-// wait for layout
-let halfWidth = 0;
-
-window.addEventListener("load", () => {
-  halfWidth = track.scrollWidth / 2;
-});
-
-function animate() {
-  x += speed + mouseInfluence * 2;
-
-  // 🔥 seamless wrap WITHOUT visible jump
-  if (halfWidth && x >= halfWidth) {
-    x -= halfWidth;
-  }
-
-  if (halfWidth && x <= 0) {
-    x += halfWidth;
-  }
-
-  track.style.transform = `translateX(${-x}px)`;
-
-  requestAnimationFrame(animate);
-}
-
-animate();
 </script>
 
 </body>
