@@ -8,12 +8,11 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
   background: #fff;
+  font-family: Arial;
   overflow-x: hidden;
 }
 
-/* HERO */
 .hero {
   height: 100vh;
   display: flex;
@@ -21,35 +20,26 @@ body {
   justify-content: center;
   background: url("https://fritsfurnituredesign.com/Images/hero.jpg") center/cover;
   color: white;
-  text-align: center;
+  font-size: 40px;
 }
 
-.logo {
-  font-size: 56px;
-  font-family: serif;
-}
-
-/* SECTION */
-.section {
-  padding: 80px 0;
-  text-align: center;
-}
-
-/* SCROLLER */
-.scroller {
+/* VIEWPORT */
+.viewport {
   width: 70%;
   margin: auto;
+  overflow: hidden;
+  position: relative;
+  padding: 60px 0;
+}
+
+/* TRACK (this is the key) */
+.track {
   display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-behavior: auto;
+  width: max-content;
+  will-change: transform;
 }
 
-.scroller::-webkit-scrollbar {
-  display: none;
-}
-
-/* CARDS */
+/* CARD */
 .card {
   flex: 0 0 260px;
   height: 225px;
@@ -68,18 +58,14 @@ body {
 
 <body>
 
-<div class="hero">
-  <div class="logo">Frits Furniture Design</div>
-</div>
+<div class="hero">Frits Furniture Design</div>
 
-<div class="section">
-  <h2>Portfolio</h2>
-
-  <div class="scroller" id="scroller"></div>
+<div class="viewport">
+  <div class="track" id="track"></div>
 </div>
 
 <script>
-const scroller = document.getElementById('scroller');
+const track = document.getElementById("track");
 
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
@@ -87,32 +73,58 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// build twice (infinite illusion)
-for (let i = 0; i < 2; i++) {
-  images.forEach(src => {
-    const card = document.createElement('div');
-    card.className = 'card';
+// build 2 identical sets
+function build() {
+  for (let i = 0; i < 2; i++) {
+    images.forEach(src => {
+      const card = document.createElement("div");
+      card.className = "card";
 
-    const img = document.createElement('img');
-    img.src = src;
+      const img = document.createElement("img");
+      img.src = src;
 
-    card.appendChild(img);
-    scroller.appendChild(card);
-  });
+      card.appendChild(img);
+      track.appendChild(card);
+    });
+  }
+}
+build();
+
+let x = 0;
+const speed = 0.6; // constant drift (smooth base motion)
+let mouseInfluence = 0;
+
+// mouse controls direction only
+document.addEventListener("mousemove", (e) => {
+  const percent = e.clientX / window.innerWidth;
+  mouseInfluence = (percent - 0.5) * 2;
+});
+
+// wait for layout
+let halfWidth = 0;
+
+window.addEventListener("load", () => {
+  halfWidth = track.scrollWidth / 2;
+});
+
+function animate() {
+  x += speed + mouseInfluence * 2;
+
+  // 🔥 seamless wrap WITHOUT visible jump
+  if (halfWidth && x >= halfWidth) {
+    x -= halfWidth;
+  }
+
+  if (halfWidth && x <= 0) {
+    x += halfWidth;
+  }
+
+  track.style.transform = `translateX(${-x}px)`;
+
+  requestAnimationFrame(animate);
 }
 
-// start in middle
-window.addEventListener('load', () => {
-  scroller.scrollLeft = scroller.scrollWidth / 2;
-});
-
-// simple mouse-driven scroll (NO physics)
-scroller.addEventListener('mousemove', (e) => {
-  const rect = scroller.getBoundingClientRect();
-  const x = (e.clientX - rect.left) / rect.width;
-
-  scroller.scrollLeft += (x - 0.5) * 10;
-});
+animate();
 </script>
 
 </body>
