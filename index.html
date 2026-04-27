@@ -45,14 +45,14 @@ body {
   width: 70%;
   margin: auto;
   overflow: hidden;
+  position: relative;
 }
 
-/* SLIDER */
-.slider {
+/* TRACK */
+.track {
   display: flex;
-  overflow-x: auto;
+  will-change: transform;
 }
-.slider::-webkit-scrollbar { display: none; }
 
 /* CARDS */
 .card {
@@ -61,7 +61,7 @@ body {
   margin: 0 -60px;
   border-radius: 14px;
   overflow: hidden;
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 .card img {
   width: 100%;
@@ -102,7 +102,7 @@ body {
   <h2 style="text-align:center;">Portfolio</h2>
 
   <div class="slider-container" id="container">
-    <div class="slider" id="slider"></div>
+    <div class="track" id="track"></div>
   </div>
 </div>
 
@@ -111,24 +111,20 @@ body {
 </div>
 
 <script>
-const slider = document.getElementById('slider');
+const track = document.getElementById('track');
 const container = document.getElementById('container');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
 
-// ===== IMAGES =====
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
   "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// ===== BUILD =====
-const setCount = 3; // important
-let oneSetWidth = 0;
-
-for (let i = 0; i < setCount; i++) {
-  images.forEach(src => {
+// ===== BUILD TWO IDENTICAL SETS =====
+function build() {
+  images.concat(images).forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
 
@@ -136,57 +132,62 @@ for (let i = 0; i < setCount; i++) {
     img.src = src;
 
     card.appendChild(img);
-    slider.appendChild(card);
+    track.appendChild(card);
   });
 }
+build();
 
-// wait for layout to measure correctly
+// ===== STATE =====
+let position = 0;
+let speed = 0;
+const MAX_SPEED = 35;
+
+// width of one full set (used for looping)
+let setWidth = 0;
+
 setTimeout(() => {
   const cards = document.querySelectorAll('.card');
-  const perSet = images.length;
+  const singleSetCount = images.length;
 
-  oneSetWidth = 0;
-  for (let i = 0; i < perSet; i++) {
-    oneSetWidth += cards[i].offsetWidth;
+  for (let i = 0; i < singleSetCount; i++) {
+    setWidth += cards[i].offsetWidth;
   }
 
-  // start in middle set
-  slider.scrollLeft = oneSetWidth;
+  position = setWidth;
 }, 100);
 
-// ===== MOUSE SCROLL =====
-let speed = 0;
-const MAX_SPEED = 40;
-
+// ===== MOUSE CONTROL =====
 container.addEventListener('mousemove', (e) => {
   const rect = container.getBoundingClientRect();
-  const percent = (e.clientX - rect.left) / rect.width;
-  speed = (percent - 0.5) * MAX_SPEED;
+  const x = (e.clientX - rect.left) / rect.width;
+
+  speed = (x - 0.5) * MAX_SPEED;
 });
 
 container.addEventListener('mouseleave', () => {
   speed = 0;
 });
 
-// ===== ANIMATION =====
+// ===== LOOP ENGINE =====
 function animate() {
-  slider.scrollLeft += speed;
+  position += speed;
 
-  // TRUE LOOP
-  if (slider.scrollLeft <= 0) {
-    slider.scrollLeft += oneSetWidth;
+  // seamless loop reset (invisible)
+  if (position <= 0) {
+    position += setWidth;
+  }
+  if (position >= setWidth * 2) {
+    position -= setWidth;
   }
 
-  if (slider.scrollLeft >= oneSetWidth * 2) {
-    slider.scrollLeft -= oneSetWidth;
-  }
+  track.style.transform = `translateX(${-position}px)`;
 
   applyEffect();
   requestAnimationFrame(animate);
 }
 animate();
 
-// ===== EFFECT =====
+// ===== VISUAL EFFECT =====
 function applyEffect() {
   const cards = document.querySelectorAll('.card');
   const center = window.innerWidth / 2;
@@ -215,7 +216,7 @@ function applyEffect() {
 }
 
 // ===== MODAL =====
-slider.addEventListener('click', (e) => {
+track.addEventListener('click', (e) => {
   if (e.target.tagName === 'IMG') {
     modal.classList.add('show');
     modalImg.src = e.target.src;
