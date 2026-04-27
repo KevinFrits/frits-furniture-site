@@ -29,7 +29,7 @@ body {
   height: 140%;
   background-image: url("https://fritsfurnituredesign.com/Images/hero.jpg");
   background-size: cover;
-  background-position: center 30%;
+  background-position: center;
 }
 
 .hero-bg::after {
@@ -39,7 +39,7 @@ body {
   background: rgba(0,0,0,0.25);
 }
 
-/* 🔥 RESTORED STACKED LOGO */
+/* 🔥 CORRECT LOGO (FRITS TOP, FURNITURE DESIGN BOTTOM) */
 .hero-content {
   position: relative;
   z-index: 2;
@@ -54,17 +54,17 @@ body {
 
 .hero h1 {
   margin: 0;
-  font-size: 64px;
+  font-size: 70px;
   font-weight: 800;
-  letter-spacing: 3px;
+  letter-spacing: 6px;
   text-transform: uppercase;
   line-height: 1;
 }
 
 .hero .sub {
-  margin-top: 10px;
-  font-size: 16px;
-  letter-spacing: 6px;
+  margin-top: 12px;
+  font-size: 18px;
+  letter-spacing: 10px;
   text-transform: uppercase;
   opacity: 0.9;
 }
@@ -135,7 +135,7 @@ button {
   <div class="hero-bg"></div>
 
   <div class="hero-content">
-    <h1>Frits</h1>
+    <h1>FRITS</h1>
     <div class="sub">Furniture Design</div>
   </div>
 </div>
@@ -180,7 +180,7 @@ button {
 </div>
 
 <script>
-// parallax (safe, stable)
+// parallax (stable)
 const heroBg = document.querySelector('.hero-bg');
 
 window.addEventListener('scroll', () => {
