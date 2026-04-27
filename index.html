@@ -11,125 +11,96 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #ffffff;
-  color: #111;
+  background: #fff;
   overflow-x: hidden;
 }
 
 /* HERO */
 .hero {
-  position: relative;
   height: 100vh;
-  overflow: hidden;
-}
-
-.hero-bg {
-  position: absolute;
-  top: -20%;
-  left: 0;
-  width: 100%;
-  height: 140%;
-  background-image: url("https://fritsfurnituredesign.com/Images/hero.jpg");
-  background-size: cover;
-  background-position: center 30%;
-}
-
-.hero-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.25);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  background: url("https://fritsfurnituredesign.com/Images/hero.jpg") center/cover;
   color: white;
   text-align: center;
 }
 
-/* LOGO */
 .logo {
   font-family: 'Playfair Display', serif;
   font-size: 56px;
 }
-
 .logo span {
   display: block;
   font-size: 14px;
   letter-spacing: 6px;
-  margin-top: 8px;
 }
 
 /* SECTION */
 .section {
-  padding: 120px 0;
+  padding: 100px 0;
 }
 
-/* CONTAINER (70% width) */
+/* CONTAINER */
 .slider-container {
   width: 70%;
   margin: auto;
   position: relative;
+  overflow: visible;
 }
 
 /* SLIDER */
-.slider-wrap {
-  position: relative;
-}
-
 .grid {
   display: flex;
   overflow-x: auto;
-  gap: 0; /* IMPORTANT for overlap */
   scroll-behavior: smooth;
-  padding: 60px 0;
+  padding: 80px 0;
 }
-
-.grid::-webkit-scrollbar {
-  display: none;
-}
+.grid::-webkit-scrollbar { display: none; }
 
 /* CARDS */
 .card {
-  flex: 0 0 380px;
-  aspect-ratio: 4 / 5;
-  border-radius: 14px;
+  flex: 0 0 360px;
+  height: 460px;
+  margin-left: -120px; /* FORCE overlap */
+  border-radius: 16px;
   overflow: hidden;
   position: relative;
-  margin: 0 -60px; /* overlap */
   transition: transform 0.25s ease, opacity 0.25s ease;
   transform: scale(0.8);
   opacity: 0.5;
 }
+.card:first-child {
+  margin-left: 0;
+}
 
 .card img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   cursor: pointer;
 }
 
-/* HOVER ZONES */
-.hover-zone {
+/* ARROWS */
+.arrow {
   position: absolute;
-  top: 0;
-  width: 120px;
-  height: 100%;
-  z-index: 10;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 30px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 50;
 }
+.arrow.left { left: -25px; }
+.arrow.right { right: -25px; }
 
-.hover-zone.left { left: 0; }
-.hover-zone.right { right: 0; }
-
-/* MODAL (fullscreen image) */
+/* MODAL */
 .modal {
   position: fixed;
   inset: 0;
@@ -139,13 +110,10 @@ body {
   justify-content: center;
   z-index: 999;
 }
-
 .modal img {
   max-width: 90%;
   max-height: 90%;
-  border-radius: 10px;
 }
-
 .modal.show {
   display: flex;
 }
@@ -154,119 +122,112 @@ body {
 
 <body>
 
-<!-- HERO -->
 <div class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-content">
-    <h1 class="logo">Frits <span>FURNITURE DESIGN</span></h1>
+  <div>
+    <div class="logo">Frits <span>FURNITURE DESIGN</span></div>
     <p>Modern Restored Furniture • Dallas, Texas</p>
   </div>
 </div>
 
-<!-- FEATURED -->
 <div class="section">
   <h2 style="text-align:center;">Featured Pieces</h2>
 
   <div class="slider-container">
-    <div class="slider-wrap">
+    <div class="arrow left" id="leftBtn">&#8249;</div>
+    <div class="arrow right" id="rightBtn">&#8250;</div>
 
-      <div class="hover-zone left"></div>
-      <div class="hover-zone right"></div>
+    <div class="grid" id="slider">
 
-      <div class="grid" id="slider">
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"></div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"></div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"></div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"></div>
+      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"></div>
 
-        <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"></div>
-        <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"></div>
-        <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"></div>
-        <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"></div>
-        <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"></div>
-
-      </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
   <img id="modalImg">
 </div>
 
 <script>
-// ===== SCROLL =====
 const slider = document.getElementById('slider');
-const leftZone = document.querySelector('.hover-zone.left');
-const rightZone = document.querySelector('.hover-zone.right');
-
-let direction = 0;
-let speed = 0;
-const MAX_SPEED = 20;
-
-function updateScroll() {
-  if (direction !== 0) {
-    slider.scrollLeft += direction * speed;
-  }
-  requestAnimationFrame(updateScroll);
-}
-updateScroll();
-
-function handleMove(e, dir) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const width = rect.width;
-
-  let intensity = dir === 1 ? x / width : 1 - (x / width);
-  speed = Math.max(2, intensity * MAX_SPEED);
-  direction = dir;
-}
-
-function stopScroll() {
-  direction = 0;
-  speed = 0;
-}
-
-rightZone.addEventListener('mousemove', (e) => handleMove(e, 1));
-leftZone.addEventListener('mousemove', (e) => handleMove(e, -1));
-rightZone.addEventListener('mouseleave', stopScroll);
-leftZone.addEventListener('mouseleave', stopScroll);
-
-// ===== CENTER FOCUS + OVERLAP =====
 const cards = document.querySelectorAll('.card');
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modalImg');
 
+// ===== CENTER SNAP =====
+function snapToCenter() {
+  let closest = null;
+  let closestDist = Infinity;
+
+  cards.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const center = rect.left + rect.width / 2;
+    const screenCenter = window.innerWidth / 2;
+    const dist = Math.abs(center - screenCenter);
+
+    if (dist < closestDist) {
+      closestDist = dist;
+      closest = card;
+    }
+  });
+
+  if (closest) {
+    const rect = closest.getBoundingClientRect();
+    const offset = rect.left + rect.width / 2 - window.innerWidth / 2;
+    slider.scrollBy({ left: offset, behavior: "smooth" });
+  }
+}
+
+// ===== SCALE + 3D =====
 slider.addEventListener('mousemove', (e) => {
   cards.forEach(card => {
     const rect = card.getBoundingClientRect();
     const center = rect.left + rect.width / 2;
-    const distance = Math.abs(e.clientX - center);
+    const distance = e.clientX - center;
 
-    const maxDistance = 500;
+    const abs = Math.abs(distance);
 
-    let scale = 1 - (distance / maxDistance);
+    let scale = 1 - (abs / 500);
     scale = Math.max(0.7, Math.min(1.2, scale));
 
-    let opacity = 1 - (distance / maxDistance);
-    opacity = Math.max(0.4, Math.min(1, opacity));
+    let rotate = distance / 20;
 
-    card.style.transform = `scale(${scale})`;
-    card.style.opacity = opacity;
+    card.style.transform = `scale(${scale}) rotateY(${rotate}deg)`;
+    card.style.opacity = 1 - (abs / 600);
     card.style.zIndex = Math.round(scale * 100);
   });
 });
 
-// ===== MODAL =====
-const modal = document.getElementById('modal');
-const modalImg = document.getElementById('modalImg');
+slider.addEventListener('mouseleave', snapToCenter);
 
+// ===== ARROWS =====
+document.getElementById('leftBtn').onclick = () => {
+  slider.scrollBy({ left: -400, behavior: "smooth" });
+};
+document.getElementById('rightBtn').onclick = () => {
+  slider.scrollBy({ left: 400, behavior: "smooth" });
+};
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === "ArrowRight") slider.scrollBy({ left: 400, behavior: "smooth" });
+  if (e.key === "ArrowLeft") slider.scrollBy({ left: -400, behavior: "smooth" });
+});
+
+// ===== MODAL =====
 cards.forEach(card => {
   const img = card.querySelector('img');
-  img.addEventListener('click', () => {
+  img.onclick = () => {
     modal.classList.add('show');
     modalImg.src = img.src;
-  });
+  };
 });
 
-modal.addEventListener('click', () => {
-  modal.classList.remove('show');
-});
+modal.onclick = () => modal.classList.remove('show');
 </script>
 
 </body>
