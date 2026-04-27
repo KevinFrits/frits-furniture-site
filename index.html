@@ -39,18 +39,17 @@ body {
 .scroller {
   width: 70%;
   margin: auto;
+  display: flex;
   overflow-x: auto;
   overflow-y: hidden;
-  display: flex;
   scroll-behavior: auto;
-  cursor: grab;
 }
 
 .scroller::-webkit-scrollbar {
   display: none;
 }
 
-/* ITEMS */
+/* CARDS */
 .card {
   flex: 0 0 260px;
   height: 225px;
@@ -88,57 +87,32 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// duplicate content for seamless feel
-for (let i = 0; i < 5; i++) {
+// build twice (infinite illusion)
+for (let i = 0; i < 2; i++) {
   images.forEach(src => {
-    const div = document.createElement('div');
-    div.className = 'card';
+    const card = document.createElement('div');
+    card.className = 'card';
 
     const img = document.createElement('img');
     img.src = src;
 
-    div.appendChild(img);
-    scroller.appendChild(div);
+    card.appendChild(img);
+    scroller.appendChild(card);
   });
 }
 
 // start in middle
 window.addEventListener('load', () => {
-  scroller.scrollLeft = scroller.scrollWidth / 3;
+  scroller.scrollLeft = scroller.scrollWidth / 2;
 });
 
-// mouse speed control
-let speed = 0;
-
+// simple mouse-driven scroll (NO physics)
 scroller.addEventListener('mousemove', (e) => {
   const rect = scroller.getBoundingClientRect();
   const x = (e.clientX - rect.left) / rect.width;
 
-  speed = (x - 0.5) * 15;
+  scroller.scrollLeft += (x - 0.5) * 10;
 });
-
-scroller.addEventListener('mouseleave', () => {
-  speed = 0;
-});
-
-// SAFE LOOP (no glitches possible)
-function animate() {
-  scroller.scrollLeft += speed;
-
-  const max = scroller.scrollWidth / 3;
-
-  if (scroller.scrollLeft > max * 2) {
-    scroller.scrollLeft = max;
-  }
-
-  if (scroller.scrollLeft < max) {
-    scroller.scrollLeft = max * 2;
-  }
-
-  requestAnimationFrame(animate);
-}
-
-animate();
 </script>
 
 </body>
