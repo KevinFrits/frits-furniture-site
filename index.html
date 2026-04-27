@@ -46,7 +46,6 @@ body {
   width: 70%;
   margin: auto;
   overflow: hidden;
-  position: relative;
 }
 
 /* TRACK */
@@ -63,7 +62,6 @@ body {
   margin: 0 -60px;
   border-radius: 14px;
   overflow: hidden;
-  position: relative;
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .card img {
@@ -126,9 +124,10 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// build MANY copies for infinite illusion
+// ===== BUILD CARDS (lots for loop illusion) =====
 let allCards = [];
-for (let i = 0; i < 8; i++) {
+
+for (let i = 0; i < 10; i++) {
   images.forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -143,9 +142,13 @@ for (let i = 0; i < 8; i++) {
 }
 
 let currentIndex = Math.floor(allCards.length / 2);
+let currentTranslate = 0;
+let lastHoveredIndex = -1;
 
 // ===== CENTER FUNCTION =====
 function centerCard(index) {
+  if (index === lastHoveredIndex) return; // prevent repeat trigger
+
   const card = allCards[index];
   const rect = card.getBoundingClientRect();
   const containerRect = container.getBoundingClientRect();
@@ -154,13 +157,51 @@ function centerCard(index) {
     rect.left + rect.width / 2 -
     (containerRect.left + containerRect.width / 2);
 
-  track.style.transform = `translateX(${parseFloat(track.style.transform.replace(/translateX\((.*)px\)/,'$1') || 0) - offset}px)`;
+  currentTranslate -= offset;
+  track.style.transform = `translateX(${currentTranslate}px)`;
 
   currentIndex = index;
+  lastHoveredIndex = index;
+
   applyEffects();
+  maintainLoop();
 }
 
-// ===== HOVER → CENTER =====
+// ===== LOOP RESET =====
+function maintainLoop() {
+  const total = allCards.length;
+
+  if (currentIndex < total * 0.3) {
+    currentIndex += total / 2;
+    jumpWithoutAnimation();
+  }
+
+  if (currentIndex > total * 0.7) {
+    currentIndex -= total / 2;
+    jumpWithoutAnimation();
+  }
+}
+
+function jumpWithoutAnimation() {
+  track.style.transition = "none";
+
+  const card = allCards[currentIndex];
+  const rect = card.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+
+  const offset =
+    rect.left + rect.width / 2 -
+    (containerRect.left + containerRect.width / 2);
+
+  currentTranslate -= offset;
+  track.style.transform = `translateX(${currentTranslate}px)`;
+
+  requestAnimationFrame(() => {
+    track.style.transition = "transform 0.4s ease";
+  });
+}
+
+// ===== HOVER =====
 allCards.forEach((card, index) => {
   card.addEventListener('mouseenter', () => {
     centerCard(index);
@@ -194,7 +235,7 @@ function applyEffects() {
   });
 }
 
-// run once
+// initial center
 setTimeout(() => centerCard(currentIndex), 100);
 
 // ===== MODAL =====
