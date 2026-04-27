@@ -54,20 +54,21 @@ body {
   display: flex;
   will-change: transform;
   position: relative;
-  height: 225px;
+  height: 270px;
 }
 
 /* CARDS */
 .card {
   position: absolute;
   left: 0;
-  top: 0;
+  top: 18px;
   flex: 0 0 260px;
   width: 260px;
   height: 225px;
   margin: 0 -60px;
   border-radius: 14px;
   overflow: hidden;
+  transform-origin: center center;
 }
 
 .card img {
@@ -306,21 +307,35 @@ function applyEffect() {
 
     const dist = cardCenterX - containerCenterX;
     const abs = Math.abs(dist);
-    const influence = Math.max(0, 1 - (abs / 560));
+    const slotDistance = abs / cardStep;
 
-    const scale = 0.74 + (0.54 * Math.pow(influence, 1.2));
-    const y = Math.pow(dist / 220, 2) * 8;
-    const rotate = dist / 30;
-    const opacity = 0.26 + (0.74 * Math.pow(influence, 0.95));
+    const centerBoost = 0.56 * Math.exp(-Math.pow(slotDistance / 0.82, 2));
+    const neighborBoost = 0.14 * Math.exp(-Math.pow((slotDistance - 1) / 0.38, 2));
+    const scaleX = 0.72 + centerBoost + neighborBoost;
+
+    const centerHeightBoost = 0.18 * Math.exp(-Math.pow(slotDistance / 0.72, 2));
+    const neighborHeightBoost = 0.05 * Math.exp(-Math.pow((slotDistance - 1) / 0.42, 2));
+    const scaleY = scaleX + centerHeightBoost + neighborHeightBoost;
+
+    const centerInfluence = Math.exp(-Math.pow(slotDistance / 0.95, 2));
+    const neighborInfluence = 0.78 * Math.exp(-Math.pow((slotDistance - 1) / 0.48, 2));
+    const visualInfluence = Math.max(centerInfluence, neighborInfluence);
+
+    const lift = -18 * Math.exp(-Math.pow(slotDistance / 0.78, 2))
+      - 4 * Math.exp(-Math.pow((slotDistance - 1) / 0.45, 2));
+    const y = Math.pow(dist / 230, 2) * 7 + lift;
+    const rotate = dist / 32;
+    const opacity = 0.24 + (0.76 * visualInfluence);
 
     card.style.left = `${x}px`;
     card.style.transform = `
       translateY(${y}px)
-      scale(${scale})
+      scaleX(${scaleX})
+      scaleY(${scaleY})
       rotateY(${rotate}deg)
     `;
     card.style.opacity = opacity;
-    card.style.zIndex = Math.round(scale * 100);
+    card.style.zIndex = Math.round((scaleY + visualInfluence) * 100);
   });
 }
 
