@@ -126,8 +126,8 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-/* BUILD (duplicate for seamless loop) */
-for (let i = 0; i < 2; i++) {
+/* BUILD */
+function addSet() {
   images.forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -140,15 +140,27 @@ for (let i = 0; i < 2; i++) {
   });
 }
 
+/* start with 2 sets so we can measure one full loop */
+addSet();
+addSet();
+
 /* ===== INFINITE LOOP (CLEAN TRANSFORM SYSTEM) ===== */
 let x = 0;
 let speed = 0;
 const MAX_SPEED = 35;
-let halfWidth = 0;
+let loopWidth = 0;
 
 /* wait for layout */
 window.addEventListener('load', () => {
-  halfWidth = slider.scrollWidth / 2;
+  const firstCard = slider.children[0];
+  const firstCardSecondSet = slider.children[images.length];
+
+  loopWidth = firstCardSecondSet.offsetLeft - firstCard.offsetLeft;
+
+  /* add enough extra sets so there is never empty space */
+  while (slider.scrollWidth < container.offsetWidth + loopWidth) {
+    addSet();
+  }
 });
 
 /* mouse control */
@@ -167,9 +179,9 @@ container.addEventListener('mouseleave', () => {
 function animate() {
   x += speed;
 
-  if (halfWidth) {
-    if (x >= halfWidth) x -= halfWidth;
-    if (x <= 0) x += halfWidth;
+  if (loopWidth) {
+    x = x % loopWidth;
+    if (x < 0) x += loopWidth;
   }
 
   slider.style.transform = `translateX(${-x}px)`;
