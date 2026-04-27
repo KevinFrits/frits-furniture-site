@@ -42,7 +42,7 @@ body {
 
 /* CONTAINER */
 .slider-container {
-  width: 70%; /* restored */
+  width: 70%;
   margin: auto;
   overflow: hidden;
 }
@@ -54,10 +54,10 @@ body {
 }
 .slider::-webkit-scrollbar { display: none; }
 
-/* CARDS (25% shorter) */
+/* CARDS */
 .card {
   flex: 0 0 260px;
-  height: 225px; /* reduced from 300 */
+  height: 225px;
   margin: 0 -60px;
   border-radius: 14px;
   overflow: hidden;
@@ -123,8 +123,11 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
 ];
 
-// build
-for (let i = 0; i < 6; i++) {
+// ===== BUILD =====
+const setCount = 3; // important
+let oneSetWidth = 0;
+
+for (let i = 0; i < setCount; i++) {
   images.forEach(src => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -137,53 +140,51 @@ for (let i = 0; i < 6; i++) {
   });
 }
 
-// start centered
-slider.scrollLeft = slider.scrollWidth / 2;
+// wait for layout to measure correctly
+setTimeout(() => {
+  const cards = document.querySelectorAll('.card');
+  const perSet = images.length;
 
-// ===== MOUSE SCROLL (FIXED STRONGER) =====
+  oneSetWidth = 0;
+  for (let i = 0; i < perSet; i++) {
+    oneSetWidth += cards[i].offsetWidth;
+  }
+
+  // start in middle set
+  slider.scrollLeft = oneSetWidth;
+}, 100);
+
+// ===== MOUSE SCROLL =====
 let speed = 0;
-const MAX_SPEED = 40; // increased so it actually moves
+const MAX_SPEED = 40;
 
 container.addEventListener('mousemove', (e) => {
   const rect = container.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const percent = x / rect.width;
-
-  const dist = percent - 0.5;
-
-  speed = dist * MAX_SPEED;
+  const percent = (e.clientX - rect.left) / rect.width;
+  speed = (percent - 0.5) * MAX_SPEED;
 });
 
 container.addEventListener('mouseleave', () => {
   speed = 0;
 });
 
-// animation loop
+// ===== ANIMATION =====
 function animate() {
-  if (Math.abs(speed) > 0.1) {
-    slider.scrollLeft += speed;
+  slider.scrollLeft += speed;
+
+  // TRUE LOOP
+  if (slider.scrollLeft <= 0) {
+    slider.scrollLeft += oneSetWidth;
   }
 
-  handleInfinite();
-  applyEffect();
+  if (slider.scrollLeft >= oneSetWidth * 2) {
+    slider.scrollLeft -= oneSetWidth;
+  }
 
+  applyEffect();
   requestAnimationFrame(animate);
 }
 animate();
-
-// ===== INFINITE LOOP =====
-function handleInfinite() {
-  const max = slider.scrollWidth;
-  const current = slider.scrollLeft;
-
-  if (current < max * 0.25) {
-    slider.scrollLeft = current + max * 0.5;
-  }
-
-  if (current > max * 0.75) {
-    slider.scrollLeft = current - max * 0.5;
-  }
-}
 
 // ===== EFFECT =====
 function applyEffect() {
@@ -212,9 +213,6 @@ function applyEffect() {
     card.style.zIndex = Math.round(scale * 100);
   });
 }
-
-// run once
-setTimeout(applyEffect, 100);
 
 // ===== MODAL =====
 slider.addEventListener('click', (e) => {
