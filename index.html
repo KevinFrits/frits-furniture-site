@@ -38,7 +38,7 @@ body {
 
 /* SECTION */
 .section {
-  padding: 100px 0;
+  padding: 80px 0;
 }
 
 /* CONTAINER */
@@ -46,24 +46,28 @@ body {
   width: 70%;
   margin: auto;
   overflow: hidden;
+  position: relative;
 }
 
 /* SLIDER */
 .grid {
   display: flex;
   gap: 0;
-  padding: 100px 0;
+  padding: 40px 0; /* reduced height */
+  overflow-x: auto;
+  scroll-behavior: smooth;
 }
+.grid::-webkit-scrollbar { display: none; }
 
-/* CARDS */
+/* CARDS (SHORTER) */
 .card {
-  flex: 0 0 340px;
-  height: 440px;
-  margin-left: -100px;
-  border-radius: 16px;
+  flex: 0 0 260px; /* smaller width */
+  height: 300px;   /* MUCH shorter */
+  margin-left: -80px;
+  border-radius: 14px;
   overflow: hidden;
   position: relative;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 .card:first-child {
   margin-left: 0;
@@ -75,6 +79,17 @@ body {
   object-fit: cover;
   cursor: pointer;
 }
+
+/* HOVER SCROLL ZONES */
+.hover-zone {
+  position: absolute;
+  top: 0;
+  width: 100px;
+  height: 100%;
+  z-index: 10;
+}
+.hover-zone.left { left: 0; }
+.hover-zone.right { right: 0; }
 
 /* MODAL */
 .modal {
@@ -108,6 +123,9 @@ body {
   <h2 style="text-align:center;">Featured Pieces</h2>
 
   <div class="slider-container">
+    <div class="hover-zone left"></div>
+    <div class="hover-zone right"></div>
+
     <div class="grid" id="slider"></div>
   </div>
 </div>
@@ -121,7 +139,7 @@ const slider = document.getElementById('slider');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
 
-// ===== IMAGE LIST (ADD / CHANGE HERE) =====
+// ===== IMAGES =====
 const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
   "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
@@ -145,7 +163,7 @@ const images = [
   "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"
 ];
 
-// ===== GENERATE CARDS =====
+// build cards
 images.forEach(src => {
   const card = document.createElement('div');
   card.className = 'card';
@@ -157,42 +175,59 @@ images.forEach(src => {
   slider.appendChild(card);
 });
 
-// duplicate for infinite loop
-slider.innerHTML += slider.innerHTML + slider.innerHTML;
+// duplicate for infinite
+slider.innerHTML += slider.innerHTML;
 
-// ===== AUTO SCROLL =====
-let scrollX = 0;
+// ===== HOVER SCROLL =====
+const leftZone = document.querySelector('.hover-zone.left');
+const rightZone = document.querySelector('.hover-zone.right');
 
-function animate() {
-  scrollX += 0.5;
+let direction = 0;
+let speed = 0;
+const MAX_SPEED = 15;
 
-  if (scrollX >= slider.scrollWidth / 3) {
-    scrollX = 0;
+function animateScroll() {
+  if (direction !== 0) {
+    slider.scrollLeft += direction * speed;
   }
-
-  slider.style.transform = `translateX(${-scrollX}px)`;
-  applyEffect();
-
-  requestAnimationFrame(animate);
+  requestAnimationFrame(animateScroll);
 }
-animate();
+animateScroll();
+
+function handleMove(e, dir) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const width = rect.width;
+
+  let intensity = dir === 1 ? x / width : 1 - (x / width);
+  speed = Math.max(1, intensity * MAX_SPEED);
+  direction = dir;
+}
+
+function stopScroll() {
+  direction = 0;
+  speed = 0;
+}
+
+rightZone.addEventListener('mousemove', (e) => handleMove(e, 1));
+leftZone.addEventListener('mousemove', (e) => handleMove(e, -1));
+rightZone.addEventListener('mouseleave', stopScroll);
+leftZone.addEventListener('mouseleave', stopScroll);
 
 // ===== RING EFFECT =====
-function applyEffect() {
+slider.addEventListener('mousemove', (e) => {
   const cards = document.querySelectorAll('.card');
-  const center = window.innerWidth / 2;
-
   cards.forEach(card => {
     const rect = card.getBoundingClientRect();
-    const cardCenter = rect.left + rect.width / 2;
-    const dist = cardCenter - center;
+    const center = rect.left + rect.width / 2;
+    const dist = e.clientX - center;
     const abs = Math.abs(dist);
 
-    let scale = 1 - (abs / 600);
-    scale = Math.max(0.6, Math.min(1.2, scale));
+    let scale = 1 - (abs / 400);
+    scale = Math.max(0.7, Math.min(1.15, scale));
 
-    let y = Math.pow(dist / 200, 2) * 20;
-    let rotate = dist / 15;
+    let y = Math.pow(dist / 200, 2) * 15;
+    let rotate = dist / 25;
 
     card.style.transform = `
       translateY(${y}px)
@@ -200,10 +235,10 @@ function applyEffect() {
       rotateY(${rotate}deg)
     `;
 
-    card.style.opacity = 1 - (abs / 800);
+    card.style.opacity = 1 - (abs / 600);
     card.style.zIndex = Math.round(scale * 100);
   });
-}
+});
 
 // ===== MODAL =====
 document.addEventListener('click', (e) => {
