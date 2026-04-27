@@ -29,6 +29,7 @@ body {
   font-family: 'Playfair Display', serif;
   font-size: 56px;
 }
+
 .logo span {
   display: block;
   font-size: 14px;
@@ -138,8 +139,8 @@ let cards = [];
 let position = 0;
 let speed = 0;
 
-const MAX_SPEED = 42;
-const ACCELERATION = 2;
+const MAX_SPEED = 49;
+const ACCELERATION = 3;
 
 let cardWidth = 0;
 let cardStep = 0;
@@ -185,7 +186,7 @@ function measure() {
 window.addEventListener('load', measure);
 window.addEventListener('resize', measure);
 
-/* mouse control uses FULL SCREEN width,
+/* mouse control uses full screen width,
    but only while cursor is within container height */
 window.addEventListener('mousemove', (e) => {
   const rect = container.getBoundingClientRect();
@@ -223,13 +224,16 @@ function applyEffect() {
   if (!totalWidth) return;
 
   const containerRect = container.getBoundingClientRect();
-  const containerCenterX = container.clientWidth / 2;
+  const viewportCenterX = window.innerWidth / 2;
+  const localCenterX = viewportCenterX - containerRect.left;
 
   cards.forEach((card, index) => {
     const relativeX = wrapCentered((index * cardStep) - position, totalWidth);
-    const x = containerCenterX - (cardWidth / 2) + relativeX;
 
-    const dist = relativeX;
+    const x = localCenterX - (cardWidth / 2) + relativeX;
+    const cardCenterX = containerRect.left + x + (cardWidth / 2);
+
+    const dist = cardCenterX - viewportCenterX;
     const abs = Math.abs(dist);
 
     let scale = 1 - (abs / 500);
