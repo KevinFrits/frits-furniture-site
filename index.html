@@ -46,7 +46,6 @@ body {
   width: 70%;
   margin: auto;
   overflow: hidden;
-  position: relative;
 }
 
 /* SLIDER */
@@ -54,7 +53,6 @@ body {
   display: flex;
   gap: 0;
   padding: 100px 0;
-  transition: transform 0.3s ease;
 }
 
 /* CARDS */
@@ -110,14 +108,7 @@ body {
   <h2 style="text-align:center;">Featured Pieces</h2>
 
   <div class="slider-container">
-    <div class="grid" id="slider">
-
-      <!-- ORIGINAL SET -->
-      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"></div>
-      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"></div>
-      <div class="card"><img src="https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"></div>
-
-    </div>
+    <div class="grid" id="slider"></div>
   </div>
 </div>
 
@@ -130,12 +121,48 @@ const slider = document.getElementById('slider');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
 
-// ===== DUPLICATE FOR INFINITE LOOP =====
+// ===== IMAGE LIST (ADD / CHANGE HERE) =====
+const images = [
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"
+];
+
+// ===== GENERATE CARDS =====
+images.forEach(src => {
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const img = document.createElement('img');
+  img.src = src;
+
+  card.appendChild(img);
+  slider.appendChild(card);
+});
+
+// duplicate for infinite loop
 slider.innerHTML += slider.innerHTML + slider.innerHTML;
 
+// ===== AUTO SCROLL =====
 let scrollX = 0;
 
-// ===== AUTO SCROLL LOOP =====
 function animate() {
   scrollX += 0.5;
 
@@ -144,15 +171,14 @@ function animate() {
   }
 
   slider.style.transform = `translateX(${-scrollX}px)`;
-
-  applyRingEffect();
+  applyEffect();
 
   requestAnimationFrame(animate);
 }
 animate();
 
 // ===== RING EFFECT =====
-function applyRingEffect() {
+function applyEffect() {
   const cards = document.querySelectorAll('.card');
   const center = window.innerWidth / 2;
 
@@ -160,17 +186,12 @@ function applyRingEffect() {
     const rect = card.getBoundingClientRect();
     const cardCenter = rect.left + rect.width / 2;
     const dist = cardCenter - center;
-
     const abs = Math.abs(dist);
 
-    // scale
     let scale = 1 - (abs / 600);
     scale = Math.max(0.6, Math.min(1.2, scale));
 
-    // vertical arc (THIS makes it look like a ring)
     let y = Math.pow(dist / 200, 2) * 20;
-
-    // tilt
     let rotate = dist / 15;
 
     card.style.transform = `
@@ -184,7 +205,7 @@ function applyRingEffect() {
   });
 }
 
-// ===== CLICK IMAGE =====
+// ===== MODAL =====
 document.addEventListener('click', (e) => {
   if (e.target.tagName === 'IMG') {
     modal.classList.add('show');
