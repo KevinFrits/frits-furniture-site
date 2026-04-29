@@ -143,9 +143,9 @@ let isUserControlling = false;
 let snapTarget = null;
 
 const MAX_SPEED = 16;
-const DEAD_ZONE = 0.1875;
-const PEAK_ZONE = 0.40;
-const OUTER_DEAD_ZONE = 0.90;
+const DEAD_ZONE_RATIO = 0.1875;
+const ACCELERATION_POWER = 1.9;
+const DECELERATION_POWER = 0.85;
 
 const SNAP_EASE_MIN = 0.075;
 const SNAP_EASE_MAX = 0.16;
@@ -232,8 +232,9 @@ function startSnap() {
 window.addEventListener('load', measure);
 window.addEventListener('resize', measure);
 
-/* mouse control uses full screen width,
-   but only while cursor is within container height */
+/* mouse control:
+   active only within the container's vertical band.
+   accelerates from center to container edges, then decelerates beyond them. */
 window.addEventListener('mousemove', (e) => {
   const rect = container.getBoundingClientRect();
   const insideContainerHeight = e.clientY >= rect.top && e.clientY <= rect.bottom;
@@ -243,11 +244,15 @@ window.addEventListener('mousemove', (e) => {
     return;
   }
 
-  const normalized = (e.clientX - (window.innerWidth / 2)) / (window.innerWidth / 2);
-  const clamped = Math.max(-1, Math.min(1, normalized));
-  const distance = Math.abs(clamped);
+  const containerCenterX = rect.left + (rect.width / 2);
+  const deltaX = e.clientX - containerCenterX;
+  const direction = Math.sign(deltaX);
+  const distance = Math.abs(deltaX);
 
-  if (distance <= DEAD_ZONE || distance >= OUTER_DEAD_ZONE) {
+  const halfContainerWidth = rect.width / 2;
+  const deadZonePx = halfContainerWidth * DEAD_ZONE_RATIO;
+
+  if (distance <= deadZonePx) {
     startSnap();
     return;
   }
@@ -255,17 +260,22 @@ window.addEventListener('mousemove', (e) => {
   isUserControlling = true;
   snapTarget = null;
 
+  const distanceToViewportEdge = direction < 0
+    ? containerCenterX
+    : window.innerWidth - containerCenterX;
+
   let magnitude = 0;
 
-  if (distance <= PEAK_ZONE) {
-    const t = (distance - DEAD_ZONE) / (PEAK_ZONE - DEAD_ZONE);
-    magnitude = MAX_SPEED * Math.pow(t, 2.1);
+  if (distance <= halfContainerWidth) {
+    const t = (distance - deadZonePx) / Math.max(1, halfContainerWidth - deadZonePx);
+    magnitude = MAX_SPEED * Math.pow(t, ACCELERATION_POWER);
   } else {
-    const t = (distance - PEAK_ZONE) / (OUTER_DEAD_ZONE - PEAK_ZONE);
-    magnitude = MAX_SPEED * (1 - Math.pow(t, 0.8));
+    const extraRange = Math.max(1, distanceToViewportEdge - halfContainerWidth);
+    const t = Math.min(1, (distance - halfContainerWidth) / extraRange);
+    magnitude = MAX_SPEED * (1 - Math.pow(t, DECELERATION_POWER));
   }
 
-  speed = Math.sign(clamped) * magnitude;
+  speed = direction * magnitude;
 });
 
 window.addEventListener('mouseleave', startSnap);
@@ -325,7 +335,7 @@ function applyEffect() {
     const centerLift = -10 * Math.exp(-Math.pow(slotDistance / 0.9, 2));
     const neighborLift = -24 * Math.exp(-Math.pow((slotDistance - 1) / 0.42, 2));
     const shoulderLift = -18 * Math.exp(-Math.pow((slotDistance - 1.8) / 1.0, 2));
-    const outerLift = -10 * Math.exp(-Math.pow((slotDistance - 2.8) / 1.15, 2));
+    const outerLift = -5 * Math.exp(-Math.pow((slotDistance - 2.8) / 1.15, 2));
     const y = Math.pow(dist / 255, 2) * 4.8 + centerLift + neighborLift + shoulderLift + outerLift;
 
     const rotate = dist / 42;
