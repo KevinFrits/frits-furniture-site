@@ -116,6 +116,7 @@ body {
   height: 100%;
   object-fit: cover;
   cursor: pointer;
+  display: block;
 }
 
 /* MODAL */
@@ -126,15 +127,88 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-}
-
-.modal img {
-  max-width: 90%;
-  max-height: 90%;
+  padding: 24px;
+  z-index: 2000;
 }
 
 .modal.show {
   display: flex;
+}
+
+.modal-stage {
+  position: relative;
+  width: min(92vw, 1200px);
+  height: min(88vh, 900px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  border-radius: 12px;
+}
+
+.modal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 54px;
+  height: 54px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  color: white;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+}
+
+.modal-arrow:hover {
+  background: rgba(255,255,255,0.28);
+}
+
+.modal-arrow-left {
+  left: 18px;
+}
+
+.modal-arrow-right {
+  right: 18px;
+}
+
+.modal-count {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 14px;
+  letter-spacing: 1px;
+  background: rgba(0,0,0,0.35);
+  padding: 8px 12px;
+  border-radius: 999px;
+}
+
+@media (max-width: 700px) {
+  .modal-arrow {
+    width: 46px;
+    height: 46px;
+    font-size: 24px;
+  }
+
+  .modal-arrow-left {
+    left: 8px;
+  }
+
+  .modal-arrow-right {
+    right: 8px;
+  }
 }
 </style>
 </head>
@@ -157,7 +231,12 @@ body {
 </div>
 
 <div class="modal" id="modal">
-  <img id="modalImg">
+  <div class="modal-stage">
+    <button class="modal-arrow modal-arrow-left" id="modalPrev" aria-label="Previous image">&#10094;</button>
+    <img id="modalImg" alt="Expanded gallery image">
+    <button class="modal-arrow modal-arrow-right" id="modalNext" aria-label="Next image">&#10095;</button>
+    <div class="modal-count" id="modalCount"></div>
+  </div>
 </div>
 
 <script>
@@ -165,15 +244,45 @@ const slider = document.getElementById('slider');
 const container = document.getElementById('container');
 const modal = document.getElementById('modal');
 const modalImg = document.getElementById('modalImg');
+const modalPrev = document.getElementById('modalPrev');
+const modalNext = document.getElementById('modalNext');
+const modalCount = document.getElementById('modalCount');
 
-const sourceImages = [
-  "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-  "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
+const gallerySets = [
+  {
+    thumb: "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+    gallery: [
+      "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+      "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+      "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
+    ]
+  },
+  {
+    thumb: "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+    gallery: [
+      "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
+      "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+      "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"
+    ]
+  },
+  {
+    thumb: "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+    gallery: [
+      "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
+      "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
+      "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"
+    ]
+  }
 ];
 
-/* 40 images long */
-const images = Array.from({ length: 40 }, (_, i) => sourceImages[i % sourceImages.length]);
+/* 40 carousel items long */
+const items = Array.from({ length: 40 }, (_, i) => {
+  const set = gallerySets[i % gallerySets.length];
+  return {
+    thumb: set.thumb,
+    gallery: set.gallery
+  };
+});
 
 let cards = [];
 let position = 0;
@@ -181,6 +290,9 @@ let speed = 0;
 let isUserControlling = false;
 let snapTarget = null;
 let interactionEnabled = true;
+
+let activeGallery = [];
+let activeGalleryIndex = 0;
 
 const MAX_SPEED = 16;
 const DEAD_ZONE_RATIO = 0.1875;
@@ -203,12 +315,14 @@ let cardMarginLeft = 0;
 let cardMarginRight = 0;
 
 /* BUILD */
-images.forEach(src => {
+items.forEach((item, index) => {
   const card = document.createElement('div');
   card.className = 'card';
+  card.dataset.itemIndex = index;
 
   const img = document.createElement('img');
-  img.src = src;
+  img.src = item.thumb;
+  img.alt = `Portfolio image ${index + 1}`;
 
   card.appendChild(img);
   slider.appendChild(card);
@@ -291,6 +405,49 @@ function updateInteractionState() {
   if (!interactionEnabled) {
     startSnap();
   }
+}
+
+function renderModalImage() {
+  if (!activeGallery.length) return;
+
+  modalImg.src = activeGallery[activeGalleryIndex];
+  modalCount.textContent = `${activeGalleryIndex + 1} / ${activeGallery.length}`;
+
+  const hasMultiple = activeGallery.length > 1;
+  modalPrev.style.display = hasMultiple ? 'flex' : 'none';
+  modalNext.style.display = hasMultiple ? 'flex' : 'none';
+  modalCount.style.display = hasMultiple ? 'block' : 'none';
+}
+
+function openModalForItem(itemIndex) {
+  const item = items[itemIndex];
+  if (!item || !item.gallery || !item.gallery.length) return;
+
+  activeGallery = item.gallery;
+  activeGalleryIndex = 0;
+  renderModalImage();
+  modal.classList.add('show');
+  updateInteractionState();
+}
+
+function closeModal() {
+  modal.classList.remove('show');
+  modalImg.src = '';
+  activeGallery = [];
+  activeGalleryIndex = 0;
+  updateInteractionState();
+}
+
+function showPreviousModalImage() {
+  if (activeGallery.length < 2) return;
+  activeGalleryIndex = (activeGalleryIndex - 1 + activeGallery.length) % activeGallery.length;
+  renderModalImage();
+}
+
+function showNextModalImage() {
+  if (activeGallery.length < 2) return;
+  activeGalleryIndex = (activeGalleryIndex + 1) % activeGallery.length;
+  renderModalImage();
 }
 
 window.addEventListener('load', () => {
@@ -429,16 +586,39 @@ function applyEffect() {
 /* MODAL */
 slider.addEventListener('click', (e) => {
   if (e.target.tagName === 'IMG') {
-    modal.classList.add('show');
-    modalImg.src = e.target.src;
-    updateInteractionState();
+    const card = e.target.closest('.card');
+    if (!card) return;
+    openModalForItem(Number(card.dataset.itemIndex));
   }
 });
 
-modal.onclick = () => {
-  modal.classList.remove('show');
-  updateInteractionState();
-};
+modalPrev.addEventListener('click', (e) => {
+  e.stopPropagation();
+  showPreviousModalImage();
+});
+
+modalNext.addEventListener('click', (e) => {
+  e.stopPropagation();
+  showNextModalImage();
+});
+
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) {
+    closeModal();
+  }
+});
+
+window.addEventListener('keydown', (e) => {
+  if (!modal.classList.contains('show')) return;
+
+  if (e.key === 'ArrowLeft') {
+    showPreviousModalImage();
+  } else if (e.key === 'ArrowRight') {
+    showNextModalImage();
+  } else if (e.key === 'Escape') {
+    closeModal();
+  }
+});
 </script>
 
 </body>
