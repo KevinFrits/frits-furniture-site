@@ -44,18 +44,21 @@ body {
 /* CONTAINER */
 .slider-container {
   width: 70%;
-  height: 390px;
   margin: auto;
   overflow: hidden;
   position: relative;
+  min-height: 390px;
 }
 
 /* SLIDER */
 .slider {
   display: flex;
   will-change: transform;
-  position: relative;
-  height: 390px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 390px;
 }
 
 /* CARDS */
@@ -141,6 +144,7 @@ let position = 0;
 let speed = 0;
 let isUserControlling = false;
 let snapTarget = null;
+let interactionEnabled = true;
 
 const MAX_SPEED = 16;
 const DEAD_ZONE_RATIO = 0.1875;
@@ -150,6 +154,11 @@ const DECELERATION_POWER = 0.85;
 const SNAP_EASE_MIN = 0.075;
 const SNAP_EASE_MAX = 0.16;
 const SNAP_THRESHOLD = 0.1;
+
+const BASE_CAROUSEL_HEIGHT = 390;
+const BASE_TOP_ROOM = 40;
+const OUTER_LIFT = -5;
+const OUTER_LIFT_HEIGHT_FACTOR = 2;
 
 let cardWidth = 0;
 let cardStep = 0;
@@ -190,6 +199,14 @@ function measure() {
   cardStep = cardWidth + cardMarginLeft + cardMarginRight;
   totalWidth = cardStep * cards.length;
 
+  const carouselHeight =
+    BASE_CAROUSEL_HEIGHT +
+    BASE_TOP_ROOM +
+    (Math.abs(OUTER_LIFT) * OUTER_LIFT_HEIGHT_FACTOR);
+
+  container.style.height = `${carouselHeight}px`;
+  slider.style.height = `${carouselHeight}px`;
+
   position = wrap(position, totalWidth);
 
   if (!isUserControlling) {
@@ -229,13 +246,33 @@ function startSnap() {
   speed = 0;
 }
 
-window.addEventListener('load', measure);
+function updateInteractionState() {
+  interactionEnabled =
+    document.visibilityState === 'visible' &&
+    document.hasFocus() &&
+    !modal.classList.contains('show');
+
+  if (!interactionEnabled) {
+    startSnap();
+  }
+}
+
+window.addEventListener('load', () => {
+  measure();
+  updateInteractionState();
+});
+
 window.addEventListener('resize', measure);
+window.addEventListener('focus', updateInteractionState);
+window.addEventListener('blur', updateInteractionState);
+document.addEventListener('visibilitychange', updateInteractionState);
 
 /* mouse control:
    active only within the container's vertical band.
    accelerates from center to container edges, then decelerates beyond them. */
 window.addEventListener('mousemove', (e) => {
+  if (!interactionEnabled) return;
+
   const rect = container.getBoundingClientRect();
   const insideContainerHeight = e.clientY >= rect.top && e.clientY <= rect.bottom;
 
@@ -283,7 +320,7 @@ window.addEventListener('mouseleave', startSnap);
 /* animation */
 function animate() {
   if (totalWidth) {
-    if (isUserControlling) {
+    if (isUserControlling && interactionEnabled) {
       position = wrap(position + speed, totalWidth);
     } else if (snapTarget !== null) {
       const delta = wrapCentered(snapTarget - position, totalWidth);
@@ -335,7 +372,7 @@ function applyEffect() {
     const centerLift = -10 * Math.exp(-Math.pow(slotDistance / 0.9, 2));
     const neighborLift = -24 * Math.exp(-Math.pow((slotDistance - 1) / 0.42, 2));
     const shoulderLift = -18 * Math.exp(-Math.pow((slotDistance - 1.8) / 1.0, 2));
-    const outerLift = -5 * Math.exp(-Math.pow((slotDistance - 2.8) / 1.15, 2));
+    const outerLift = OUTER_LIFT * Math.exp(-Math.pow((slotDistance - 2.8) / 1.15, 2));
     const y = Math.pow(dist / 255, 2) * 4.8 + centerLift + neighborLift + shoulderLift + outerLift;
 
     const rotate = dist / 42;
@@ -358,10 +395,14 @@ slider.addEventListener('click', (e) => {
   if (e.target.tagName === 'IMG') {
     modal.classList.add('show');
     modalImg.src = e.target.src;
+    updateInteractionState();
   }
 });
 
-modal.onclick = () => modal.classList.remove('show');
+modal.onclick = () => {
+  modal.classList.remove('show');
+  updateInteractionState();
+};
 </script>
 
 </body>
