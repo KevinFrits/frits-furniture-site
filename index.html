@@ -237,7 +237,7 @@ body {
 <body>
 
 <div class="hero">
-  <img class="hero-bg" src="images/hero.jpg" alt="">
+  <img class="hero-bg" src="images/hero.jpg" alt="Frits Furniture Design hero image">
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="logo">Frits <span>FURNITURE DESIGN</span></div>
@@ -273,11 +273,6 @@ const modalCount = document.getElementById('modalCount');
 
 const IMAGE_EXT = "jpg";
 
-/*
-  Edit this list only.
-  id = main carousel image name in images/portfolio/
-  galleryCount = number of images inside images/portfolio/{id}/
-*/
 const portfolioConfig = [
   { id: 1, galleryCount: 4 },
   { id: 2, galleryCount: 3 },
@@ -325,7 +320,6 @@ let totalWidth = 0;
 let cardMarginLeft = 0;
 let cardMarginRight = 0;
 
-/* BUILD */
 items.forEach((item, index) => {
   const card = document.createElement('div');
   card.className = 'card';
