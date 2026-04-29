@@ -20,7 +20,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: url("https://fritsfurnituredesign.com/Images/hero.jpg") center/cover;
+  background: url("images/hero.jpg") center/cover;
   color: white;
   text-align: center;
 }
@@ -248,41 +248,29 @@ const modalPrev = document.getElementById('modalPrev');
 const modalNext = document.getElementById('modalNext');
 const modalCount = document.getElementById('modalCount');
 
-const gallerySets = [
-  {
-    thumb: "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-    gallery: [
-      "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-      "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-      "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg"
-    ]
-  },
-  {
-    thumb: "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-    gallery: [
-      "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg",
-      "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-      "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg"
-    ]
-  },
-  {
-    thumb: "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-    gallery: [
-      "https://fritsfurnituredesign.com/Images/PXL_20260329_151518426.jpg",
-      "https://fritsfurnituredesign.com/Images/PXL_20250504_191031269.jpg",
-      "https://fritsfurnituredesign.com/Images/PXL_20260208_182315496.jpg"
-    ]
-  }
+const IMAGE_EXT = "jpg";
+
+/*
+  Edit this list only.
+  id = main carousel image name in images/portfolio/
+  galleryCount = number of images inside images/portfolio/{id}/
+*/
+const portfolioConfig = [
+  { id: 1, galleryCount: 4 },
+  { id: 2, galleryCount: 3 },
+  { id: 3, galleryCount: 5 },
+  { id: 4, galleryCount: 2 }
 ];
 
-/* 40 carousel items long */
-const items = Array.from({ length: 40 }, (_, i) => {
-  const set = gallerySets[i % gallerySets.length];
-  return {
-    thumb: set.thumb,
-    gallery: set.gallery
-  };
-});
+const gallerySets = portfolioConfig.map((item) => ({
+  thumb: `images/portfolio/${item.id}.${IMAGE_EXT}`,
+  gallery: Array.from(
+    { length: item.galleryCount },
+    (_, index) => `images/portfolio/${item.id}/${index + 1}.${IMAGE_EXT}`
+  )
+}));
+
+const items = gallerySets;
 
 let cards = [];
 let position = 0;
