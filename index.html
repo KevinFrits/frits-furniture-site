@@ -44,6 +44,7 @@ body {
 /* CONTAINER */
 .slider-container {
   width: 70%;
+  height: 390px;
   margin: auto;
   overflow: hidden;
   position: relative;
@@ -54,21 +55,21 @@ body {
   display: flex;
   will-change: transform;
   position: relative;
-  height: 270px;
+  height: 390px;
 }
 
 /* CARDS */
 .card {
   position: absolute;
   left: 0;
-  top: 18px;
-  flex: 0 0 260px;
-  width: 260px;
+  bottom: 0;
+  flex: 0 0 280px;
+  width: 280px;
   height: 225px;
   margin: 0 -60px;
   border-radius: 14px;
   overflow: hidden;
-  transform-origin: center center;
+  transform-origin: center bottom;
 }
 
 .card img {
@@ -309,21 +310,19 @@ function applyEffect() {
     const abs = Math.abs(dist);
     const slotDistance = abs / cardStep;
 
-    const centerBoost = 0.56 * Math.exp(-Math.pow(slotDistance / 0.82, 2));
-    const neighborBoost = 0.14 * Math.exp(-Math.pow((slotDistance - 1) / 0.38, 2));
-    const scaleX = 0.72 + centerBoost + neighborBoost;
+    const centerBoost = 0.68 * Math.exp(-Math.pow(slotDistance / 0.82, 2));
+    const neighborBoost = 0.18 * Math.exp(-Math.pow((slotDistance - 1) / 0.40, 2));
+    const scaleX = 0.70 + centerBoost + neighborBoost;
 
-    const centerHeightBoost = 0.18 * Math.exp(-Math.pow(slotDistance / 0.72, 2));
-    const neighborHeightBoost = 0.05 * Math.exp(-Math.pow((slotDistance - 1) / 0.42, 2));
+    const centerHeightBoost = 0.24 * Math.exp(-Math.pow(slotDistance / 0.72, 2));
+    const neighborHeightBoost = 0.06 * Math.exp(-Math.pow((slotDistance - 1) / 0.44, 2));
     const scaleY = scaleX + centerHeightBoost + neighborHeightBoost;
 
     const centerInfluence = Math.exp(-Math.pow(slotDistance / 0.95, 2));
     const neighborInfluence = 0.78 * Math.exp(-Math.pow((slotDistance - 1) / 0.48, 2));
     const visualInfluence = Math.max(centerInfluence, neighborInfluence);
 
-    const lift = -18 * Math.exp(-Math.pow(slotDistance / 0.78, 2))
-      - 4 * Math.exp(-Math.pow((slotDistance - 1) / 0.45, 2));
-    const y = Math.pow(dist / 230, 2) * 7 + lift;
+    const y = Math.pow(dist / 230, 2) * 7;
     const rotate = dist / 32;
     const opacity = 0.24 + (0.76 * visualInfluence);
 
