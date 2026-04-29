@@ -278,4 +278,81 @@ function animate() {
     } else if (snapTarget !== null) {
       const delta = wrapCentered(snapTarget - position, totalWidth);
       const normalizedDelta = Math.min(1, Math.abs(delta) / cardStep);
-      const snapEase = SNAP_EASE_MIN + (SNAP_EASE_MAX - SNAP_EASE_MIN)
+      const snapEase = SNAP_EASE_MIN + (SNAP_EASE_MAX - SNAP_EASE_MIN) * normalizedDelta;
+
+      if (Math.abs(delta) > SNAP_THRESHOLD) {
+        position = wrap(position + (delta * snapEase), totalWidth);
+      } else {
+        position = wrap(snapTarget, totalWidth);
+        snapTarget = null;
+      }
+    }
+
+    applyEffect();
+  }
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* EFFECT + TRUE INFINITE RING POSITIONING */
+function applyEffect() {
+  if (!totalWidth) return;
+
+  const containerCenterX = container.clientWidth / 2;
+
+  cards.forEach((card, index) => {
+    const relativeX = wrapCentered((index * cardStep) - position, totalWidth);
+    const x = containerCenterX - cardMarginLeft - (cardWidth / 2) + relativeX;
+    const cardCenterX = x + cardMarginLeft + (cardWidth / 2);
+
+    const dist = cardCenterX - containerCenterX;
+    const abs = Math.abs(dist);
+    const slotDistance = abs / cardStep;
+
+    const centerBoost = 0.68 * Math.exp(-Math.pow(slotDistance / 0.82, 2));
+    const neighborBoost = 0.18 * Math.exp(-Math.pow((slotDistance - 1) / 0.40, 2));
+    const scaleX = 0.70 + centerBoost + neighborBoost;
+
+    const centerHeightBoost = 0.24 * Math.exp(-Math.pow(slotDistance / 0.72, 2));
+    const neighborHeightBoost = 0.06 * Math.exp(-Math.pow((slotDistance - 1) / 0.44, 2));
+    const scaleY = scaleX + centerHeightBoost + neighborHeightBoost;
+
+    const centerInfluence = Math.exp(-Math.pow(slotDistance / 0.95, 2));
+    const neighborInfluence = 0.78 * Math.exp(-Math.pow((slotDistance - 1) / 0.48, 2));
+    const visualInfluence = Math.max(centerInfluence, neighborInfluence);
+
+    const centerLift = -10 * Math.exp(-Math.pow(slotDistance / 0.9, 2));
+    const neighborLift = -24 * Math.exp(-Math.pow((slotDistance - 1) / 0.42, 2));
+    const shoulderLift = -18 * Math.exp(-Math.pow((slotDistance - 1.8) / 1.0, 2));
+    const outerLift = -20 * Math.exp(-Math.pow((slotDistance - 2.8) / 1.15, 2));
+    const y = Math.pow(dist / 255, 2) * 4.8 + centerLift + neighborLift + shoulderLift + outerLift;
+
+    const rotate = dist / 42;
+    const opacity = 0.10 + (0.90 * Math.pow(visualInfluence, 1.35));
+
+    card.style.left = `${x}px`;
+    card.style.transform = `
+      translateY(${y}px)
+      scaleX(${scaleX})
+      scaleY(${scaleY})
+      rotateY(${rotate}deg)
+    `;
+    card.style.opacity = opacity;
+    card.style.zIndex = Math.round((scaleY + visualInfluence) * 100);
+  });
+}
+
+/* MODAL */
+slider.addEventListener('click', (e) => {
+  if (e.target.tagName === 'IMG') {
+    modal.classList.add('show');
+    modalImg.src = e.target.src;
+  }
+});
+
+modal.onclick = () => modal.classList.remove('show');
+</script>
+
+</body>
+</html>
