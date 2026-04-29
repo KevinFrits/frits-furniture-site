@@ -64,7 +64,7 @@ body {
 
 /* CONTAINER */
 .slider-container {
-  width: 70%;
+  width: 90%;
   margin: auto;
   overflow: hidden;
   position: relative;
@@ -73,19 +73,19 @@ body {
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0%,
-    rgba(0, 0, 0, 0.35) 6%,
-    black 14%,
-    black 86%,
-    rgba(0, 0, 0, 0.35) 94%,
+    rgba(0, 0, 0, 0.35) 4%,
+    black 10%,
+    black 90%,
+    rgba(0, 0, 0, 0.35) 96%,
     transparent 100%
   );
   mask-image: linear-gradient(
     to right,
     transparent 0%,
-    rgba(0, 0, 0, 0.35) 6%,
-    black 14%,
-    black 86%,
-    rgba(0, 0, 0, 0.35) 94%,
+    rgba(0, 0, 0, 0.35) 4%,
+    black 10%,
+    black 90%,
+    rgba(0, 0, 0, 0.35) 96%,
     transparent 100%
   );
 }
@@ -237,7 +237,7 @@ body {
 <body>
 
 <div class="hero">
-  <img class="hero-bg" src="images/hero.jpg" alt="Frits Furniture Design hero image">
+  <img class="hero-bg" src="./images/hero-banner.jpg?v=1" alt="">
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="logo">Frits <span>FURNITURE DESIGN</span></div>
@@ -272,6 +272,7 @@ const modalNext = document.getElementById('modalNext');
 const modalCount = document.getElementById('modalCount');
 
 const IMAGE_EXT = "jpg";
+const CAROUSEL_ITEM_COUNT = 40;
 
 const portfolioConfig = [
   { id: 1, galleryCount: 4 },
@@ -288,7 +289,14 @@ const gallerySets = portfolioConfig.map((item) => ({
   )
 }));
 
-const items = gallerySets;
+/* Restore the old repeated ring behavior */
+const items = Array.from({ length: CAROUSEL_ITEM_COUNT }, (_, i) => {
+  const set = gallerySets[i % gallerySets.length];
+  return {
+    thumb: set.thumb,
+    gallery: set.gallery
+  };
+});
 
 let cards = [];
 let position = 0;
